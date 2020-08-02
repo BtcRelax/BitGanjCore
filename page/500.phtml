@@ -1,0 +1,17 @@
+<?php
+namespace BtcRelax;
+?>
+<script>
+    dhtmlx.confirm({
+        title:"Ошибка! Сбросить сессию?",
+        type:"confirm-error",
+        text:"Произошла ошибка обработки запроса: <?php echo htmlentities($extraParams['message']); ?>",
+        ok:"К ибеням",
+        cancel:"Не",
+        callback: function() {
+            JApp.activatePage('kill');
+        }
+	});
+
+</script>
+	

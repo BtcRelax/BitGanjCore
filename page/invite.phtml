@@ -1,0 +1,23 @@
+<header><center><h1 class="w3-display-topmiddle w3-panel w3-blue w3-round-medium">Приглашение нового пользователя</h1></center></header>
+<div id="inviteDialog" title="Уважаемый пользователь!" >
+   <form id="inviteForm" method="POST" action="#">
+    <p>Будьте внимательны. После нажатия,  пригласить, система вернется в то состояние, что было до того как Вы сделали в нее вход. После этого, новому пользователю нужно будет войти. 
+    Любым способом, т.е. e-mail, Telegram, либо Copoban. В случае если   новый пользователь будет заходить через Telegram,или Copoban, то ему даже нет необходимости брать в руки устройство. 
+    Ему необходимо, всего лишь считать QR-код. 
+    И не забывайте, что раз уж Вы пригласили человека, то и подскажите ему, как пользоваться системой, дабы он зря, не напрягал Джа.</p>     
+    <input type="hidden" name="action" value="doInvite">
+    <input type="hidden" name="page" value="invite">
+    <center><input type="submit" class="button-buy button-buy-shadow button-buy-pulse" value="Пригласить!"></center>
+   </form>
+</div>
+<script>$( function() {
+     var vWidth = $(window).innerWidth() - 100;
+     $("#inviteDialog").dialog({
+        show: {
+            effect: JApp.getEffect(),
+            duration: 5000
+        },
+        width: vWidth,
+     });
+}); </script>
+<?php if (isset($vLHCWidgetScript)) { echo $vLHCWidgetScript; }

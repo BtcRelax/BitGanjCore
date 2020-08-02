@@ -1,0 +1,7 @@
+<div id="dialogRegister" title="Уважаемый аноним!">
+            <form id="registerForm" method="POST" action="#">
+                <?php echo($vInFormHtml); ?>
+                <input type="hidden" name="authType" value="<?php echo($vIdentType) ?>" />
+            </form>
+</div>
+<?php if (!empty($vOutFormHtml)) { echo($vOutFormHtml);} ?>

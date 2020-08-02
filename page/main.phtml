@@ -1,0 +1,62 @@
+<?php if (isset($vInviteHeaderHtml)) { echo $vInviteHeaderHtml; } ?>
+<div id="loginDialog" class="w3-display-middle" style="display: none"  >
+       <?php if (isset($vHtml)) { echo($vHtml); } else { ?>
+    <div class="panel-group" id="accordion"><div id="idBitIdIdent"  class="panel panel-default">
+                <div class="panel-heading">
+                  <center><h1>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseBitId">Copoban</a>
+                  </h1></center>
+                </div>
+                <div id="collapseBitId" class="panel-collapse collapse" >
+                  <div class="panel-body">
+                      <div id="copobanContentId" class="w3-animate-zoom" ><form id="frmLoginBitId" action="#" method="post"><input id="idNonce" name="nonce" value="" type="hidden" />
+              <a id="idNonceLink" href=""><img id="idImageNonce" class="loginQr" alt="Copoban" border="0" src="/img/WaitCover.gif" /></a>
+              <input id="idRefreshInterval" type="hidden"  value="" />
+              <input type="hidden" name="checkId" value="BitId" /></form></div>
+                  </div>
+                </div>
+              <script>
+                   $('#collapseBitId').on('hide.bs.collapse', function( event ) { JApp.Auth( event );} );
+                   $('#collapseBitId').on('show.bs.collapse', function( event ){ JApp.Auth( event , 'BitId');} ); 
+              </script>
+                   </div><div id="idEmailIdIdent" class="panel panel-default">
+                <div class="panel-heading">
+                  <center><h1>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseMailId">E-mail</a>
+                  </h1></center>
+                </div>
+                <div id="collapseMailId" class="panel-collapse collapse ">
+                  <div class="panel-body"><form id="frmLoginMail" class="form-horizontal" action="#" method="post">
+                    <div class="form-group">
+                        <div class="col-md-12"><input type="email" name="mail"  class="form-control" id="inputEmail" placeholder="Укажите e-mail!" required></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12"></div>
+                    </div>                    
+                    <div class="form-group">
+                        <div class="col-md-12"><center>
+                            <button id="idMailSend" type="button" onclick="JApp.sendMailId();" class="btn btn-primary">Отправить код проверки</button>
+                        </center></div>
+                    </div>
+                    <input type="hidden" name="checkId" value="EmailId" />
+                </form></div>
+                </div>
+              </div><div id="idTelegramIdIdent" class="panel panel-default">
+                <div class="panel-heading">
+                  <center><h1>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseTelegram">Telegram</a>
+                  </h1></center>
+                </div>
+                <div id="collapseTelegram" class="panel-collapse collapse">
+                  <div class="panel-body"><center><form id="frmLoginTelegramId" action="#" method="post"><input id="idNonce" name="nonce" value="" type="hidden" />
+              <a id="idBotNonceLink" href="" target="_blank" ><img id="idImageBotNonce" class="loginQr" alt="Copoban via telegram bot" border="0" src="/img/WaitCover.gif" /></a>
+              <input id="idRefreshInterval" type="hidden"  value="" />
+              <input type="hidden" name="checkId" value="TelegramId" /></form></center></div>
+                </div>
+              <script>
+                   $('#collapseTelegram').on('hide.bs.collapse', function(event ) { JApp.Auth(event);} );
+                   $('#collapseTelegram').on('show.bs.collapse', function( event ){ JApp.Auth(event, 'TelegramId');} ); 
+              </script>
+       </div></div> <?php } ?>
+</div>
+<?php if (isset($vLHCHtml) && (FALSE !== $vLHCHtml)) { echo $vLHCHtml; } 

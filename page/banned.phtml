@@ -1,0 +1,10 @@
+<header><center><h1 class="w3-display-topmiddle w3-panel w3-blue w3-round-medium">Исповедальня Джа</h1></center></header>
+<div id="bannedDialog" class="w3-display-middle panel panel-default">
+    <div class="panel-body">
+     <?php if (isset($vLHCHtml)) { echo $vLHCHtml; } else { ?> 
+            <h2>Обратись к богу Джа!</h2>
+            <p><a  class="ui-button" href="<?php echo $vContactLink; ?>" target="_blank" >инструкции</a></p>
+            <p>При обращении, укажи код:<?php echo $vCustCode; ?></p>
+    <?php } ?>
+    <div>
+</div>

@@ -1,0 +1,6 @@
+<?php  if (FALSE === $activeOrder) { ?>
+<header><center><h1 class="w3-display-topmiddle w3-panel w3-blue w3-round-medium">Закладки</h1></center></header>
+<div id="forntshopContext" class="w3-row front_shop_panel w3-modal" style="display: block;" ><?php echo (\BtcRelax\page\frontshop\renderGetActiveBookmarks()); ?></div>
+        <?php } ?>
+<div id="dialogOrder" title="Заказ"  ><form id="frmProcessOrder" method="POST" action="#"></div>
+<?php if (isset($vLHCWidgetScript)) { echo $vLHCWidgetScript; }

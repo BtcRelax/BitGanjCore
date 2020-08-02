@@ -1,0 +1,22 @@
+{
+    "name": "btcrelax/bitganj-core",
+    "type": "library",
+    "version": "v1.0.0",
+    "description": "Core BtcRelax Shop libraries",
+    "keywords": ["framework", "http", "rest", "web service", "curl", "client", "HTTP client"],
+    "homepage": "http://bitganj.website/",
+    "license": "Unlicense",
+    "authors": [
+        {
+            "name": "god Jah",
+            "email": "god@fastfen.club"
+        }
+    ],
+    "minimum-stability":"dev",
+    "require": {
+        "phpmailer/phpmailer": "v6.1.6",
+        "guzzlehttp/guzzle": "6.3.1",
+        "longman/telegram-bot": "0.63.1",
+        "btcrelax/services-api": "dev-master"
+    }
+}

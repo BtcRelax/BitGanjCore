@@ -1,0 +1,72 @@
+<div tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front 
+     ui-dialog-buttons ui-draggable" aria-describedby="dialog" aria-labelledby="ui-id-18" 
+     style="position: absolute; height: auto; width: 400px; top: 1317.5px; left: 747px; display: block;">
+    <div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle">
+        Уважаемый АНОНИМ!        
+    </div>
+    
+    <div id="dialog" class="ui-dialog-content ui-widget-content" 
+         style="width: auto; min-height: 2px; max-height: none; height: auto;">
+        <div id="myForm" style="height:550px;"></div>
+    </div>
+
+    <div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-e" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-s" style="z-index: 90;">
+
+    </div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;">
+
+    </div><div class="ui-resizable-handle ui-resizable-sw" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-ne" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90;"></div>
+
+</div>
+<script>
+		var myForm, formData;
+                formData = [
+				{type: "settings", position: "label-left", labelWidth: 130, inputWidth: 120},
+				{type: "fieldset", label: "Welcome", inputWidth: 340, list:[
+					{type: "radio", name: "type", label: "Already have account", labelWidth: "auto", position: "label-right", checked: true, list:[
+						{type: "input", label: "Login", value: "p_rossi"},
+						{type: "password", label: "Password", value: "123"},
+						{type: "checkbox", label: "Remember me", checked: true}
+					]},
+					{type: "radio", name: "type", label: "Not registered yet", labelWidth: "auto", position: "label-right", list:[
+						{type: "input", label: "Full Name", value: "Patricia D. Rossi"},
+						{type: "input", label: "E-mail Address", value: "p_rossi@example.com"},
+						{type: "input", label: "Login", value: "p_rossi"},
+						{type: "password", label: "Password", value: "123"},
+						{type: "password", label: "Confirm Password", value: "123"},
+						{type: "checkbox", label: "Subscribe on news"}
+					]},
+					{type: "radio", name: "type", label: "Guest login", labelWidth: "auto", position: "label-right", list:[
+						{type: "select", label: "Account type", options:[
+							{text: "Admin", value: "admin"},
+							{text: "Organiser", value: "org"},
+							{text: "Power User", value: "poweruser"},
+							{text: "User", value: "user"}
+						]},
+						{type: "checkbox", label: "Show logs window"}
+					]},
+					{type: "button", value: "Proceed"}
+				]}
+			];
+    myForm = new dhtmlXForm("myForm", formData);                   
+    $("#dialog").dialog({
+        title: "Уважаемый аноним!",
+        resizable: false,
+        beforeClose: function(event, ui) { 
+               btnPush();
+            },
+        autoOpen: false,
+        buttons: [
+            {
+                text: "Продолжить!",
+                click: function () {
+                            createNewUser();           
+                }
+            }
+        ]
+    });
+</script>

@@ -1,0 +1,5 @@
+git composer.phar
+/vendor/
+composer.lock
+/nbproject/private/
+/vendor/**/.git

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru-UA">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="browserRequirements" content="requires HTML5 support" />
+    <meta property="storageRequirements" content="Local Storage of browser" />
+    <meta property="applicationCategory" content="Data management" />
+    <meta property="creator" content="God Jah" />
+    <link href="js/mainfest.json" rel="manifest" >
+    <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="../css/<?php echo defined('THEME_STYLE')?THEME_STYLE:"styles.css"; ?>" rel="stylesheet" type="text/css">
+    <link href="../css/show_message.css" rel="stylesheet" type="text/css" >
+    <link href="../css/jquery-ui.css" rel="stylesheet" >
+    <link href="../css/notify.css" rel="stylesheet" type="text/css">
+    <link href="../css/w3.css" rel="stylesheet" type="text/css" >
+    <link href="../css/app.css" rel="stylesheet" type="text/css" >
+    <link rel="stylesheet" type="text/css" href="../../../codebase/skins/web/dhtmlx.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../codebase/skins/terrace/dhtmlx.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../codebase/skins/skyblue/dhtmlx.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../codebase/dhtmlx.css"/>
+    <link href="../codebase/dhtmlx.css" rel="stylesheet" type="text/css" >   
+    <script type="text/javascript" src="../js/jquery-1.11.3.min.js" ></script>
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/notify.js" ></script>   		
+    <script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../codebase/dhtmlx.js" ></script> 
+    <script type="text/javascript" src="../../js/app/localstorage.js" ></script>
+    <script type="text/javascript" src="../../js/app/xhr.js" ></script>
+    <script type="text/javascript" src="../../js/model/authenticator.js" ></script>
+    <script type="text/javascript" src="../../js/ctrl/lhcplugin.js" ></script>
+    <script type="text/javascript" src="../../js/ctrl/wndSessions.js" ></script>
+    <script type="text/javascript" src="../../js/model/order.js" ></script>
+    <script type="text/javascript" src="../../js/model/point.js" ></script>
+    <script type="text/javascript" src="../../js/model/invoice.js" ></script>
+    <script type="text/javascript" src="../../js/model/user.js" ></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+            overflow: hidden;
+        }
+    </style>
+
+    </head>
+    <body id="idContentContext" class="bgimg w3-container" >
+        <header>
+        <nav><div class="navbar-header">                       
+                <button id="idMainButton" class="logo_auth button-buy button-buy-pulse button-buy-shadow" onclick="JApp.buttonPush();" >
+                    <img сlass="button-buy" src="<?php echo(LOGO)?>"  />
+                </button>	
+            </div> <?php if (isset($header) && !empty($header) ) { echo ($header->renderGetHeaderHtml()); }?>
+        </nav>
+        </header>    
+        <section id="idContent"><article id="<?php echo($page); ?>"><?php require $template; ?></article></section>
+        <footer class="wb_footer w3-container" id="footer" role="contentinfo"><?php include __DIR__.'/footer.php'; ?></footer>
+    </body>
+</html>
