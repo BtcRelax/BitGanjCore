@@ -13,6 +13,11 @@
         }
     ],
     "minimum-stability":"dev",
+    "autoload":{
+        "psr-0":{
+        "BtcRelax":"/"
+        }
+    },
     "require": {
         "phpmailer/phpmailer": "v6.1.6",
         "guzzlehttp/guzzle": "6.3.1",
