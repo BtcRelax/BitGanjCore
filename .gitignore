@@ -3,3 +3,5 @@ git composer.phar
 composer.lock
 /nbproject/private/
 /vendor/**/.git
+nbproject/project.properties
+nbproject/project.xml
