@@ -5,16 +5,18 @@ namespace BtcRelax\Dao;
 use \PDO;
 use \Exception;
 
-class BaseDao {
-
+class BaseDao
+{
     protected $db = null;
     protected $autocommit = true;
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->db = null;
     }
 
-    public function __construct($db = null, $autocommit = true) {
+    public function __construct($db = null, $autocommit = true)
+    {
         $this->autocommit = $autocommit;
         if ($db !== null) {
             $this->db = $db;
@@ -28,15 +30,18 @@ class BaseDao {
         }
     }
 
-    protected function getAutocommit() {
+    protected function getAutocommit()
+    {
         return $this->autocommit;
     }
 
-    public function getDb() {
+    public function getDb()
+    {
         return $this->db;
     }
 
-    public function addToFilter($filter, $newWhere) {
+    public function addToFilter($filter, $newWhere)
+    {
         if (empty($filter)) {
             return \sprintf('WHERE %s', $newWhere);
         } else {
@@ -44,15 +49,16 @@ class BaseDao {
         }
     }
 
-    public function executeStatement(\PDOStatement $statement, array $params) {
-
+    public function executeStatement(\PDOStatement $statement, array $params)
+    {
         if ($statement->execute($params) === false) {
             \BtcRelax\Log::general(\sprintf("Error when execute sql:%s", $this->pdo_debugStrParams($statement)), \BtcRelax\Log::ERROR);
             self::throwDbError($this->getDb()->errorInfo());
         }
     }
 
-    public function pdo_debugStrParams($stmt) {
+    public function pdo_debugStrParams($stmt)
+    {
         ob_start();
         $stmt->debugDumpParams();
         $r = ob_get_contents();
@@ -60,7 +66,8 @@ class BaseDao {
         return $r;
     }
 
-    public function query($sql) {
+    public function query($sql)
+    {
         $statement = $this->getDb()->query($sql, PDO::FETCH_ASSOC);
         if ($statement === false) {
             self::throwDbError($this->getDb()->errorInfo());
@@ -68,24 +75,27 @@ class BaseDao {
         return $statement;
     }
 
-    public function get_numeric($val) {
+    public function get_numeric($val)
+    {
         if (is_numeric($val)) {
             return (int) $val + 0;
         }
         return 0;
     }
 
-    protected static function throwDbError(array $errorInfo) {
+    protected static function throwDbError(array $errorInfo)
+    {
         $error_message = 'DB error [' . $errorInfo[0] . ', ' . $errorInfo[1] . ']: ' . $errorInfo[2];
         throw new Exception($error_message);
     }
 
-    protected static function formatDateTime(\DateTime $date) {
+    protected static function formatDateTime(\DateTime $date)
+    {
         return $date->format('Y-m-d H:i:s');
     }
 
-    protected static function formatBoolean($bool) {
+    protected static function formatBoolean($bool)
+    {
         return $bool ? 1 : 0;
     }
-
 }

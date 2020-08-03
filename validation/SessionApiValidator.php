@@ -1,8 +1,6 @@
 <?php
 namespace BtcRelax\Validation;
 
-final class SessionApiValidator {
-    
-    
-    
+final class SessionApiValidator
+{
 }

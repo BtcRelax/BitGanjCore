@@ -13,74 +13,83 @@ namespace BtcRelax\Model;
  *
  * @author god
  */
-class Region {
-	// private members 
-	private $m_RegionId;
-	private $m_ParentRegionId;
-	private $m_RegionTitle;
+class Region
+{
+    // private members
+    private $m_RegionId;
+    private $m_ParentRegionId;
+    private $m_RegionTitle;
 
 
-	/**
-	* Constructor
-	* 
-	* Example: 
-	* $myRegion = new Region();
-	*/
-	public function __construct() {
-		//--
-	}
+    /**
+    * Constructor
+    *
+    * Example:
+    * $myRegion = new Region();
+    */
+    public function __construct()
+    {
+        //--
+    }
 
-	/**
-	* Constructor
-	* 
-	* Example: 
-	* $myRegion = Region::WithParams( val1, val2,.. );
-	*/
-	public static function WithParams($RegionId, $ParentRegionId, $RegionTitle) {
-		$instance = new self();
-		$instance->m_RegionId = $RegionId;
-		$instance->m_ParentRegionId = $ParentRegionId;
-		$instance->m_RegionTitle = $RegionTitle;
-		return $instance;
-	}
-
-
-	/**
-	* Getters and Setters
-	*/
-
-	public function getRegionId() {
-		return $this->m_RegionId;
-	}
-
-	public function setRegionId($RegionId) {
-		$this->m_RegionId = $RegionId;
-	}
-
-	public function getParentRegionId() {
-		return $this->m_ParentRegionId;
-	}
-
-	public function setParentRegionId($ParentRegionId) {
-		$this->m_ParentRegionId = $ParentRegionId;
-	}
-
-	public function getRegionTitle() {
-		return $this->m_RegionTitle;
-	}
-
-	public function setRegionTitle($RegionTitle) {
-		$this->m_RegionTitle = $RegionTitle;
-	}
+    /**
+    * Constructor
+    *
+    * Example:
+    * $myRegion = Region::WithParams( val1, val2,.. );
+    */
+    public static function WithParams($RegionId, $ParentRegionId, $RegionTitle)
+    {
+        $instance = new self();
+        $instance->m_RegionId = $RegionId;
+        $instance->m_ParentRegionId = $ParentRegionId;
+        $instance->m_RegionTitle = $RegionTitle;
+        return $instance;
+    }
 
 
+    /**
+    * Getters and Setters
+    */
 
-	/**
-	* Methods
-	*/
+    public function getRegionId()
+    {
+        return $this->m_RegionId;
+    }
 
-	public function __toString() {
-		return "";
-	}
-    
+    public function setRegionId($RegionId)
+    {
+        $this->m_RegionId = $RegionId;
+    }
+
+    public function getParentRegionId()
+    {
+        return $this->m_ParentRegionId;
+    }
+
+    public function setParentRegionId($ParentRegionId)
+    {
+        $this->m_ParentRegionId = $ParentRegionId;
+    }
+
+    public function getRegionTitle()
+    {
+        return $this->m_RegionTitle;
+    }
+
+    public function setRegionTitle($RegionTitle)
+    {
+        $this->m_RegionTitle = $RegionTitle;
+    }
+
+
+
+    /**
+    * Methods
+    */
+
+    public function __toString()
+    {
+        return "";
+    }
 }

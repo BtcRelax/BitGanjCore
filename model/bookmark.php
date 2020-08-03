@@ -2,8 +2,8 @@
 
 namespace BtcRelax\Model;
 
-class Bookmark {
-
+class Bookmark
+{
     const STATUS_PREPARING = "Preparing";
     const STATUS_CHECKING = "Checking";
     const STATUS_REJECTED = "Rejected";
@@ -32,7 +32,8 @@ class Bookmark {
     private $pTargetAddress;
     private $pBookmarkHash;
     
-    public function __construct($params = null) {
+    public function __construct($params = null)
+    {
         $this->pState = self::STATUS_PREPARING;
         $this->pIdBookmark = null;
         $this->pDescription = "";
@@ -63,10 +64,10 @@ class Bookmark {
     public function getBookmarkInfo()
     {
         $result = null;
-        if ($this->isUnlocked()){
-            $result = ['id' => $this->getIdBookmark(), 
-               'Title' => $this->getAdvertiseTitleHTML(), 
-               'RegionTitle' => $this->getRegionTitle(), 
+        if ($this->isUnlocked()) {
+            $result = ['id' => $this->getIdBookmark(),
+               'Title' => $this->getAdvertiseTitleHTML(),
+               'RegionTitle' => $this->getRegionTitle(),
                'Unlocked' => $this->isUnlocked(),
                'Latitude' => $this->getLatitude(),
                'Longitude' => $this->getLongitude(),
@@ -75,146 +76,182 @@ class Bookmark {
                'Description' => $this->getDescription(),
                ];
         } else {
-            $result = ['id' => $this->getIdBookmark(), 
-               'Title' => $this->getAdvertiseTitleHTML(), 
-               'RegionTitle' => $this->getRegionTitle(), 
-               'Unlocked' => $this->isUnlocked() ];        
+            $result = ['id' => $this->getIdBookmark(),
+               'Title' => $this->getAdvertiseTitleHTML(),
+               'RegionTitle' => $this->getRegionTitle(),
+               'Unlocked' => $this->isUnlocked() ];
         }
         if (!empty($this->pIdOrder)) {
-             $vIdOrder = $this->getIdOrder();
-             $result += ['OrderId' => intval($vIdOrder) ];
+            $vIdOrder = $this->getIdOrder();
+            $result += ['OrderId' => intval($vIdOrder) ];
         }
         return $result;
     }
     
-    public function getTargetAddress() {
+    public function getTargetAddress()
+    {
         return $this->pTargetAddress;
     }
     
-    public function isUnlocked():bool {
+    public function isUnlocked():bool
+    {
         return $this->getUnlockDate() == null? false : true ;
     }
 
-    public function setTargetAddress($pTargetAddress) {
+    public function setTargetAddress($pTargetAddress)
+    {
         $this->pTargetAddress = $pTargetAddress;
     }
 
-    public function getBookmarkHash() {
+    public function getBookmarkHash()
+    {
         return $this->pBookmarkHash;
     }
 
-    function setBookmarkHash($pBookmarkHash) {
+    public function setBookmarkHash($pBookmarkHash)
+    {
         $this->pBookmarkHash = $pBookmarkHash;
     }
 
         
-    public function getIdBookmark() {
+    public function getIdBookmark()
+    {
         return $this->pIdBookmark !== null? (int) $this->pIdBookmark:null ;
     }
 
-    function setIdBookmark($pValue) {
+    public function setIdBookmark($pValue)
+    {
         $this->pIdBookmark = $pValue;
     }
 
-    function getState() {
+    public function getState()
+    {
         return $this->pState;
     }
 
-    function setState($pValue) {
-        if (($pValue === self::STATUS_LOST) || ($pValue === self::STATUS_CATCHED)) { $this->setEndDate(new \DateTime()); }
-        if ($pValue === self::STATUS_PUBLISHED) { $this->setIdOrder(null); }
+    public function setState($pValue)
+    {
+        if (($pValue === self::STATUS_LOST) || ($pValue === self::STATUS_CATCHED)) {
+            $this->setEndDate(new \DateTime());
+        }
+        if ($pValue === self::STATUS_PUBLISHED) {
+            $this->setIdOrder(null);
+        }
         $this->pState = $pValue;
     }
 
-    function getCreateDate() {
+    public function getCreateDate()
+    {
         return $this->pCreateDate;
     }
 
-    function setCreateDate($pValue) {
+    public function setCreateDate($pValue)
+    {
         $this->pCreateDate = $pValue;
     }
 
-    function getIdOrder() {
+    public function getIdOrder()
+    {
         return $this->pIdOrder;
     }
     
-    function getOrder():\BtcRelax\Model\Order {
+    public function getOrder():\BtcRelax\Model\Order
+    {
         return \BtcRelax\OM::orderById($this->pIdOrder);
-    } 
+    }
     
-    function setIdOrder($pValue) {
+    public function setIdOrder($pValue)
+    {
         $this->pIdOrder = $pValue;
     }
 
-    function getLatitude() {
+    public function getLatitude()
+    {
         return $this->pLatitude;
     }
 
-    function setLatitude($pValue) {
+    public function setLatitude($pValue)
+    {
         $this->pLatitude = $pValue;
     }
 
-    function getLongitude() {
+    public function getLongitude()
+    {
         return $this->pLongitude;
     }
 
-    function setLongitude($pValue) {
+    public function setLongitude($pValue)
+    {
         $this->pLongitude = $pValue;
     }
 
-    function getLink() {
+    public function getLink()
+    {
         return $this->pLink;
     }
 
-    function setLink($pValue) {
+    public function setLink($pValue)
+    {
         $this->pLink = $pValue;
     }
 
-    function getDescription() {
+    public function getDescription()
+    {
         return $this->pDescription;
     }
 
-    function setDescription($pValue) {
+    public function setDescription($pValue)
+    {
         $this->pDescription = $pValue;
     }
 
-    function getRegionTitle() {
+    public function getRegionTitle()
+    {
         return $this->pRegionTitle;
     }
 
-    function setRegionTitle($pValue) {
+    public function setRegionTitle($pValue)
+    {
         $this->pRegionTitle = $pValue;
     }
 
-    function getIdDroper() {
+    public function getIdDroper()
+    {
         return $this->pIdDroper;
     }
 
-    function setIdDroper($pValue) {
+    public function setIdDroper($pValue)
+    {
         $this->pIdDroper = $pValue;
     }
 
-    function getCustomPrice():float {
+    public function getCustomPrice():float
+    {
         return $this->pCustomPrice;
     }
 
-    function setCustomPrice($pValue) {
+    public function setCustomPrice($pValue)
+    {
         $this->pCustomPrice = (float)$pValue;
     }
     
-    function getPriceCurrency() {
+    public function getPriceCurrency()
+    {
         return $this->pPriceCurrency ?? \BtcRelax\RE::UAH ;
     }
 
-    function setPriceCurrency($pPriceCurrency) {
+    public function setPriceCurrency($pPriceCurrency)
+    {
         $this->pPriceCurrency = $pPriceCurrency;
     }
 
-    function getAdvertiseTitle() {
+    public function getAdvertiseTitle()
+    {
         return $this->pAdvertiseTitle;
     }
     
-    function getAdvertiseTitleHTML() {
+    public function getAdvertiseTitleHTML()
+    {
         $result = $this->getAdvertiseTitle();
         if (\BtcRelax\Utils::isJson($result)) {
             $result = $this->prepareTitle($result);
@@ -222,27 +259,33 @@ class Bookmark {
         return $result;
     }
     
-    function setAdvertiseTitle($pValue) {
+    public function setAdvertiseTitle($pValue)
+    {
         $this->pAdvertiseTitle = $pValue;
     }
 
-    function getUnlockDate() {
+    public function getUnlockDate()
+    {
         return $this->pUnlockDate;
     }
 
-    function setUnlockDate($pValue) {
+    public function setUnlockDate($pValue)
+    {
         $this->pUnlockDate = $pValue;
     }
 
-    function getEndDate() {
+    public function getEndDate()
+    {
         return $this->pEndDate;
     }
 
-    function setEndDate($pValue) {
+    public function setEndDate($pValue)
+    {
         $this->pEndDate = $pValue;
     }
 
-    public static function allStatuses() {
+    public static function allStatuses()
+    {
         return [
             self::STATUS_PREPARING,
             self::STATUS_CHECKING,
@@ -258,15 +301,18 @@ class Bookmark {
 
     
     
-    public function getStateInfo() {
+    public function getStateInfo()
+    {
         $result = ["bookmarkId" => $this->getIdBookmark(), "bookmarkState" => $this->getState()];
         //if (!\is_null($this->getEndDate())) { $result += [ "bookmarkEndDate" => $this->getEndDate()]; }
-		if (!\is_null($this->getEndDate())) { $result += [ "bookmarkEndDate" => \BtcRelax\Utils::formatDateTime($this->getEndDate())]; }
-        if (!\is_null($this->getIdOrder())) { 
+        if (!\is_null($this->getEndDate())) {
+            $result += [ "bookmarkEndDate" => \BtcRelax\Utils::formatDateTime($this->getEndDate())];
+        }
+        if (!\is_null($this->getIdOrder())) {
             $vOrderId = \intval($this->getIdOrder());
             $result += [ "bookmarkOrderId" => $vOrderId ] ;
-			$vOM = \BtcRelax\Core::createOM();
-			$vOrderInfo = $vOM->getOrderInfoById($vOrderId);
+            $vOM = \BtcRelax\Core::createOM();
+            $vOrderInfo = $vOM->getOrderInfoById($vOrderId);
             $result += [ "bookmarkOrder" => $vOrderInfo ];
         }
         return  $result;
@@ -277,19 +323,22 @@ class Bookmark {
 //        return $vOM->getOrderInfoById($pOrderId);
 //    }
     
-    function prepareTitle($pTitle) {
-        $titlesArray = \BtcRelax\Utils::getJson($pTitle); $result = null;
+    public function prepareTitle($pTitle)
+    {
+        $titlesArray = \BtcRelax\Utils::getJson($pTitle);
+        $result = null;
         foreach ($titlesArray as $value) {
             $vProductId = $value['ProductId'];
             $vPM = \BtcRelax\Core::createPM();
             $vProduct = $vPM->getProduct($vProductId);
             $vTitle = $value['Title'];
-            $result = \sprintf('<a href="%s" target="_blank">%s</a> %s', $vProduct->getDescriptionUrl() , $vProduct->getProductName() , $vTitle  );
+            $result = \sprintf('<a href="%s" target="_blank">%s</a> %s', $vProduct->getDescriptionUrl(), $vProduct->getProductName(), $vTitle);
         }
         return $result;
     }
     
-    public function GetPublicForm() {
+    public function GetPublicForm()
+    {
         $lLink = 'Купить';
         $lTitle = $this->getRegionTitle();
         $lAdverTitle = $this->getAdvertiseTitleHTML();
@@ -308,47 +357,51 @@ class Bookmark {
 									</p></center></div>
 								</div>
 							</form>
-							</div>", $this->getBookmarkHash(), $lAdverTitle, $lTitle, $lLocalPrice, $vBookmarkId, $vBookmarkId , $lLink);
+							</div>", $this->getBookmarkHash(), $lAdverTitle, $lTitle, $lLocalPrice, $vBookmarkId, $vBookmarkId, $lLink);
         return $result;
     }
-			
-    public function getLocationLink() {
+            
+    public function getLocationLink()
+    {
         if (isset($this->pLatitude) && isset($this->pLongitude)) {
             if (is_numeric($this->getLatitude()) && is_numeric($this->getLongitude())) {
-                return \sprintf("http://maps.google.com/maps?f=q&q=loc:%s,%s&t=k&spn=0.5,0.5",$this->getLatitude(),$this->getLongitude());
+                return \sprintf("http://maps.google.com/maps?f=q&q=loc:%s,%s&t=k&spn=0.5,0.5", $this->getLatitude(), $this->getLongitude());
             }
         }
     }
 
-    public function setDroperId($pDroperId) {
+    public function setDroperId($pDroperId)
+    {
         $this->pIdDroper = $pDroperId;
     }
 
-    public function setRegionNames($pRegionTitleUkr, $pRegionTitleRus) {
+    public function setRegionNames($pRegionTitleUkr, $pRegionTitleRus)
+    {
         $this->pRegionTitle = $pRegionTitleUkr;
         $this->pRegionTitle_ru = $pRegionTitleRus;
     }
 
-    public function setLocation($pLatitude, $pLongitude) {
+    public function setLocation($pLatitude, $pLongitude)
+    {
         $this->pLatitude = $pLatitude;
         $this->pLongitude = $pLongitude;
     }
 
-    public function setRegion($selectedRegion) {
+    public function setRegion($selectedRegion)
+    {
         $curReg = Region::getRegionList();
         $regionInfo = $curReg[$selectedRegion];
         $this->pRegionTitle = $regionInfo['TitleUkr'];
         $this->pRegionTitle_ru = $regionInfo['TitleRus'];
     }
 
-    public function saveToDb() {
+    public function saveToDb()
+    {
         $result = false;
-        if ($this->pIdBookmark === null)
-        {
+        if ($this->pIdBookmark === null) {
             $dao = \BtcRelax\BookmarkDao();
             $daoRes = $dao->createNew($this);
-            if ($daoRes instanceof \BtcRelax\Model\Bookmark)
-            {
+            if ($daoRes instanceof \BtcRelax\Model\Bookmark) {
                 $result = $daoRes;
             }
             // Need to insert, else update
@@ -356,49 +409,45 @@ class Bookmark {
         return ($result);
     }
 
-    public function validateNewState($vNewState) {
-        $vCurrentState = $this->getState(); $result = '';
+    public function validateNewState($vNewState)
+    {
+        $vCurrentState = $this->getState();
+        $result = '';
         if ($vCurrentState === $vNewState) {
             $result = \sprintf("Point already in state:%s", $vCurrentState);
         } else {
-        switch ($vCurrentState) {
+            switch ($vCurrentState) {
                      case \BtcRelax\Model\Bookmark::STATUS_PREPARING:
-                         if (!($vNewState == \BtcRelax\Model\Bookmark::STATUS_PUBLISHED ) && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_REJECTED) 
-                                 && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_LOST ) && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_SALED ))
-                         {
-                             $result = \sprintf("Changing state from:%s only allowed to Published or Rejected  or Lost! Or Saled, when sale from hands.",$vCurrentState);
+                         if (!($vNewState == \BtcRelax\Model\Bookmark::STATUS_PUBLISHED) && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_REJECTED)
+                                 && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_LOST) && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_SALED)) {
+                             $result = \sprintf("Changing state from:%s only allowed to Published or Rejected  or Lost! Or Saled, when sale from hands.", $vCurrentState);
                          } else {
-                             if (empty($this->pLink) || empty($this->pRegionTitle) || empty($this->pAdvertiseTitle)) 
-                             {
-                                $result = "Bookmark incompleate! Field Link or RegionTitle or Advertise, still empty. Operation forbiden!"; 
+                             if (empty($this->pLink) || empty($this->pRegionTitle) || empty($this->pAdvertiseTitle)) {
+                                 $result = "Bookmark incompleate! Field Link or RegionTitle or Advertise, still empty. Operation forbiden!";
                              }
                          }
                     break;
                      case \BtcRelax\Model\Bookmark::STATUS_SALED:
-                         if (($vNewState !== \BtcRelax\Model\Bookmark::STATUS_LOST) && ($vNewState !== \BtcRelax\Model\Bookmark::STATUS_CATCHED) && ($vNewState  !== \BtcRelax\Model\Bookmark::STATUS_PREPARING))
-                         {
-                             $result = \sprintf("Changing state from:%s only Lost or Catched or Preparing!",$vCurrentState);
+                         if (($vNewState !== \BtcRelax\Model\Bookmark::STATUS_LOST) && ($vNewState !== \BtcRelax\Model\Bookmark::STATUS_CATCHED) && ($vNewState  !== \BtcRelax\Model\Bookmark::STATUS_PREPARING)) {
+                             $result = \sprintf("Changing state from:%s only Lost or Catched or Preparing!", $vCurrentState);
                          }
-                         break;                     
+                         break;
                      case \BtcRelax\Model\Bookmark::STATUS_PUBLISHED:
-                         if (!($vNewState == \BtcRelax\Model\Bookmark::STATUS_PREPARING ) && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_REJECTED) 
-                            && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_LOST ) &&  ($vNewState !== \BtcRelax\Model\Bookmark::STATUS_SALED))
-                         {
-                             $result = \sprintf("Changing state from:%s only allowed to Preparing or Rejected or Lost!",$vCurrentState);
+                         if (!($vNewState == \BtcRelax\Model\Bookmark::STATUS_PREPARING) && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_REJECTED)
+                            && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_LOST) &&  ($vNewState !== \BtcRelax\Model\Bookmark::STATUS_SALED)) {
+                             $result = \sprintf("Changing state from:%s only allowed to Preparing or Rejected or Lost!", $vCurrentState);
                          }
                          break;
                      case \BtcRelax\Model\Bookmark::STATUS_REJECTED:
-                         if (!($vNewState == \BtcRelax\Model\Bookmark::STATUS_PREPARING ) && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_LOST ) )
-                         {
-                             $result = \sprintf("Changing state from:%s only allowed to Preparing or Lost!",$vCurrentState);
+                         if (!($vNewState == \BtcRelax\Model\Bookmark::STATUS_PREPARING) && !($vNewState == \BtcRelax\Model\Bookmark::STATUS_LOST)) {
+                             $result = \sprintf("Changing state from:%s only allowed to Preparing or Lost!", $vCurrentState);
                          }
                          break;
                      default:
-                         $result = \sprintf("Changing state from %s to %s has no rule!",$vCurrentState, $vNewState);
+                         $result = \sprintf("Changing state from %s to %s has no rule!", $vCurrentState, $vNewState);
                          break;
                 }
         }
-        return $result;                
+        return $result;
     }
-
 }

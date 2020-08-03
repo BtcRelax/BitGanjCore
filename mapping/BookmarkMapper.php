@@ -1,13 +1,16 @@
 <?php
 namespace BtcRelax\Mapping;
+
 use \DateTime;
 use BtcRelax\Log;
 
-final class BookmarkMapper {
-
-    private function __construct() {       
+final class BookmarkMapper
+{
+    private function __construct()
+    {
     }
-    public static function map(\BtcRelax\Model\Bookmark $bookmark, array $properties) {
+    public static function map(\BtcRelax\Model\Bookmark $bookmark, array $properties)
+    {
         if (array_key_exists('idBookmark', $properties)) {
             $bookmark->setIdBookmark($properties['idBookmark']);
         }
@@ -70,12 +73,11 @@ final class BookmarkMapper {
         }
         if (array_key_exists('BookmarkHash', $properties)) {
             $bookmark->setBookmarkHash($properties['BookmarkHash']);
-        }        
-        
+        }
     }
 
-    private static function createDateTime($input) {
+    private static function createDateTime($input)
+    {
         return DateTime::createFromFormat('Y-n-j H:i:s', $input);
     }
-
 }

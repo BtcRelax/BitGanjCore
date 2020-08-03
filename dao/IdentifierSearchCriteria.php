@@ -1,7 +1,8 @@
 <?php
 namespace BtcRelax\Dao;
 
-final class IdentifierSearchCriteria {
+final class IdentifierSearchCriteria
+{
 
     /**
      * @var array
@@ -11,42 +12,50 @@ final class IdentifierSearchCriteria {
     private $vIdentityKey;
     private $vIdCustomer = null;
         
-    public function __construct(array $params = null) {
-        if ($params !== null) 
-            {
-                $this->parseParams($params);
-            }
+    public function __construct(array $params = null)
+    {
+        if ($params !== null) {
+            $this->parseParams($params);
+        }
     }
 
-    public function getIdIdentity() {
+    public function getIdIdentity()
+    {
         return $this->vIdIdentity;
     }
 
-    public function getIdentTypeCode() {
+    public function getIdentTypeCode()
+    {
         return $this->vIdentTypeCode;
     }
 
-    public function getIdentityKey() {
+    public function getIdentityKey()
+    {
         return $this->vIdentityKey;
     }
 
-    public function getIdCustomer() {
+    public function getIdCustomer()
+    {
         return $this->vIdCustomer;
     }
 
-    public function setIdIdentity($vIdIdentity) {
+    public function setIdIdentity($vIdIdentity)
+    {
         $this->vIdIdentity = $vIdIdentity;
     }
 
-    public function setIdentTypeCode($vIdentTypeCode) {
+    public function setIdentTypeCode($vIdentTypeCode)
+    {
         $this->vIdentTypeCode = $vIdentTypeCode;
     }
 
-    public function setIdentityKey($vIdentityKey) {
+    public function setIdentityKey($vIdentityKey)
+    {
         $this->vIdentityKey = $vIdentityKey;
     }
 
-    public function setIdCustomer($vIdCustomer) {
+    public function setIdCustomer($vIdCustomer)
+    {
         $this->vIdCustomer = $vIdCustomer;
     }
 
@@ -54,13 +63,19 @@ final class IdentifierSearchCriteria {
     private function parseParams(array $params)
     {
         foreach ($params as $key => $value) {
-                if ($key == 'IdentTypeCode' ) { $this->setIdentTypeCode($value); }
-                if ($key == 'IdentityKey' ) { $this->setIdentityKey($value); }
-                if ($key == 'IdCustomer') { $this->setIdCustomer($value); }           
-                if ($key == 'IdIdentity') { $this->setIdIdentity($value); }               
-                }
-            return $this;
-                
+            if ($key == 'IdentTypeCode') {
+                $this->setIdentTypeCode($value);
+            }
+            if ($key == 'IdentityKey') {
+                $this->setIdentityKey($value);
+            }
+            if ($key == 'IdCustomer') {
+                $this->setIdCustomer($value);
+            }
+            if ($key == 'IdIdentity') {
+                $this->setIdIdentity($value);
+            }
         }
- }
-
+        return $this;
+    }
+}

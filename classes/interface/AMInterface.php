@@ -2,7 +2,8 @@
 
 namespace BtcRelax;
 
-interface IAM {
+interface IAM
+{
     //put your code here
     public function CreateNewUser();
 

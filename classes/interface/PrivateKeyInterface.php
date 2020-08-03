@@ -21,8 +21,8 @@ This program is free software: you can redistribute it and/or modify
  *
  * @author Matej Danter
  */
-interface PrivateKeyInterface {
-    
+interface PrivateKeyInterface
+{
     public function __construct(PublicKey $public_key, $secret_multiplier);
 
     public function sign($hash, $random_k);
@@ -35,4 +35,3 @@ interface PrivateKeyInterface {
 
     public static function point_is_valid(Point $generator, $x, $y);
 }
-?>

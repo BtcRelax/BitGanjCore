@@ -13,51 +13,59 @@ namespace BtcRelax\Model;
  *
  * @author Chronos
  */
-class token {
-    
+class token
+{
     private $tokenId;
     private $idCustomer;
     private $RightCode;
     private $TokenKey;
     
-    public function __construct() {
-        
+    public function __construct()
+    {
     }
     
-    public function setTokenId($tokenId) {
+    public function setTokenId($tokenId)
+    {
         $this->tokenId = $tokenId;
         return $this;
     }
 
-    public function setIdCustomer($idCustomer) {
+    public function setIdCustomer($idCustomer)
+    {
         $this->idCustomer = $idCustomer;
         return $this;
     }
 
-    public function setRightCode($RightCode) {
+    public function setRightCode($RightCode)
+    {
         $this->RightCode = $RightCode;
         return $this;
     }
 
-    public function setTokenKey($TokenKey) {
+    public function setTokenKey($TokenKey)
+    {
         $this->TokenKey = $TokenKey;
         return $this;
     }
 
         
-    public function getTokenId() {
+    public function getTokenId()
+    {
         return $this->tokenId;
     }
 
-    public function getIdCustomer() {
+    public function getIdCustomer()
+    {
         return $this->idCustomer;
     }
 
-    public function getRightCode() {
+    public function getRightCode()
+    {
         return $this->RightCode;
     }
 
-    public function getTokenKey() {
+    public function getTokenKey()
+    {
         return $this->TokenKey;
     }
 

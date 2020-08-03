@@ -22,9 +22,10 @@ This program is free software: you can redistribute it and/or modify
  * This class implements all neccessary static methods
  *
  */
-class gmp_Utils {
-
-    public static function gmp_mod2($n, $d) {
+class gmp_Utils
+{
+    public static function gmp_mod2($n, $d)
+    {
         if (extension_loaded('gmp') && USE_EXT=='GMP') {
             $res = gmp_div_r($n, $d);
             if (gmp_cmp(0, $res) > 0) {
@@ -36,7 +37,8 @@ class gmp_Utils {
         }
     }
 
-    public static function gmp_random($n) {
+    public static function gmp_random($n)
+    {
         if (extension_loaded('gmp') && USE_EXT=='GMP') {
             $random = gmp_strval(gmp_random());
             $small_rand = mt_rand();
@@ -50,7 +52,8 @@ class gmp_Utils {
         }
     }
 
-    public static function gmp_hexdec($hex) {
+    public static function gmp_hexdec($hex)
+    {
         if (extension_loaded('gmp') && USE_EXT=='GMP') {
             $dec = gmp_strval(gmp_init($hex), 10);
 
@@ -60,7 +63,8 @@ class gmp_Utils {
         }
     }
 
-    public static function gmp_dechex($dec) {
+    public static function gmp_dechex($dec)
+    {
         if (extension_loaded('gmp') && USE_EXT=='GMP') {
             $hex = gmp_strval(gmp_init($dec), 16);
 
@@ -69,6 +73,4 @@ class gmp_Utils {
             throw new Exception("PLEASE INSTALL GMP");
         }
     }
-
 }
-?>

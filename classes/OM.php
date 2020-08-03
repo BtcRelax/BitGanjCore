@@ -1,41 +1,49 @@
 <?php
 namespace BtcRelax;
 
-class OM implements IOM {
-
+class OM implements IOM
+{
     private $pCore;
     private $pCurrentSession = null;
     private $pLastError = null;
     private $pCurrentOrder = null;
 
-    private function getCurrentOrder() {
+    private function getCurrentOrder()
+    {
         return $this->pCurrentOrder === null ? false : $this->pCurrentOrder;
     }
 
-    private function setCurrentOrder(\BtcRelax\Model\Order $pCurrentOrder = null) {
-        if (!empty($pCurrentOrder))
-        { $this->getCurrentSession()->setValue('CurrentOrder', $pCurrentOrder);
-        } else { $this->getCurrentSession()->clearValue('CurrentOrder'); }
+    private function setCurrentOrder(\BtcRelax\Model\Order $pCurrentOrder = null)
+    {
+        if (!empty($pCurrentOrder)) {
+            $this->getCurrentSession()->setValue('CurrentOrder', $pCurrentOrder);
+        } else {
+            $this->getCurrentSession()->clearValue('CurrentOrder');
+        }
         $this->pCurrentOrder = $pCurrentOrder;
     }
 
-    public function __construct() {
+    public function __construct()
+    {
         global $core;
         $this->pCore = $core;
     }
 
-    private function getCurrentSession(): \BtcRelax\SecureSession {
+    private function getCurrentSession(): \BtcRelax\SecureSession
+    {
         if (is_null($this->pCurrentSession)) {
             $this->pCurrentSession = $this->pCore->getCurrentSession();
         }
         return $this->pCurrentSession;
     }
 
-    public function getLastError() {
+    public function getLastError()
+    {
         return $this->pLastError;
     }
 
-    public function setLastError($_lastError = null) {
+    public function setLastError($_lastError = null)
+    {
         if ($_lastError !== null && !empty($_lastError)) {
             \BtcRelax\Log::general(\sprintf('OM was set last error, to:%s', $_lastError), \BtcRelax\Log::WARN);
         }
@@ -45,13 +53,14 @@ class OM implements IOM {
  
 
     // Get opened order if his exists.
-    // Check in DB for active order, if not exists 
+    // Check in DB for active order, if not exists
     // check session, and fill.
-    public function getActualOrder() {
+    public function getActualOrder()
+    {
         $result = $this->getCurrentOrder();
         if (\FALSE === $result) {
             $vOrder = $this->getOrdersByUser();
-            if (\FALSE !== $vOrder) {                
+            if (\FALSE !== $vOrder) {
                 $this->setCurrentOrder($vOrder);
             }
         }
@@ -61,7 +70,8 @@ class OM implements IOM {
 
 
     /// Create new order  for current user, and return it
-    public function createNewOrder(): \BtcRelax\Model\Order {
+    public function createNewOrder(): \BtcRelax\Model\Order
+    {
         $vAM = \BtcRelax\Core::createAM();
         $pUser = $vAM->getUser();
         $newOrder = new \BtcRelax\Model\Order();
@@ -71,23 +81,25 @@ class OM implements IOM {
     }
 
     /// Get payment providers from session
-    public function actionGetCurrentPaymentProviders() {
+    public function actionGetCurrentPaymentProviders()
+    {
         $vSession = $this->getCurrentSession();
         $pRes = $vSession->getValue('CurrentPaymentProviders');
         return $pRes;
     }
 
-    /// 
-    public function checkPaymentByOrderId(int $pOrderId) {
+    ///
+    public function checkPaymentByOrderId(int $pOrderId)
+    {
         $result = false;
         $pOrder = $this->getOrderById($pOrderId);
         $vOrder = \BtcRelax\OM::initOrder($pOrder);
         $vInvoices = $vOrder->getInvoices();
         if ($vInvoices > 0) {
             foreach ($vInvoices as $vInvoice) {
-                \BtcRelax\Log::general(\sprintf("Invoice id:%s will check ballance.", $vInvoice->getIdInvoices() ), \BtcRelax\Log::INFO);
+                \BtcRelax\Log::general(\sprintf("Invoice id:%s will check ballance.", $vInvoice->getIdInvoices()), \BtcRelax\Log::INFO);
                 $checkResult = $vInvoice->actionCheckPayment();
-                if (FALSE !== $checkResult) {
+                if (false !== $checkResult) {
                     $vInvoiceDao = new \BtcRelax\Dao\InvoiceDao(null, false);
                     $vDB = $vInvoiceDao->getDb();
                     $vDB->beginTransaction();
@@ -109,75 +121,95 @@ class OM implements IOM {
                     $this->setLastError("Cannot update ballance");
                 }
             }
-        } else { 
-            $this->setLastError(\sprintf("Invoices not found in order id:%s",$pOrderId ));
+        } else {
+            $this->setLastError(\sprintf("Invoices not found in order id:%s", $pOrderId));
         }
         return $result;
     }
 
-    /// Check order for payment 
-    public function checkOrderPayment() {
+    /// Check order for payment
+    public function checkOrderPayment()
+    {
         $vOrder = $this->getActualOrder();
         $result = is_numeric($vOrder->getIdOrder());
         if ($result) {
-				$result = $this->checkPaymentByOrderId($vOrder->getIdOrder());
+            $result = $this->checkPaymentByOrderId($vOrder->getIdOrder());
         };
         return $result;
     }
 
     /// Cancel order if possible, in another case return false
-    public function changeOrderState(\BtcRelax\Model\Order $pOrder = null, \BtcRelax\Model\User $pUser = null, $vNewState ) {
+    public function changeOrderState(\BtcRelax\Model\Order $pOrder = null, \BtcRelax\Model\User $pUser = null, $vNewState)
+    {
         $vAM = \BtcRelax\Core::createAM();
-        if (empty($pOrder)) {$pOrder = $this->getActualOrder();}
-        if (empty($pUser)) { $pUser = $vAM->getUser(); }
-        if ($pOrder instanceof \BtcRelax\Model\Order) {   
+        if (empty($pOrder)) {
+            $pOrder = $this->getActualOrder();
+        }
+        if (empty($pUser)) {
+            $pUser = $vAM->getUser();
+        }
+        if ($pOrder instanceof \BtcRelax\Model\Order) {
             $vState = $pOrder->getState();
-            \BtcRelax\Log::general(\sprintf("Trying to cancel order from state:%s",$vState), \BtcRelax\Log::DEBUG);           
+            \BtcRelax\Log::general(\sprintf("Trying to cancel order from state:%s", $vState), \BtcRelax\Log::DEBUG);
             switch ($vState) {
                 case \BtcRelax\Model\Order::STATUS_CREATED:
                     $this->setCurrentOrder();
+                    // no break
                 case \BtcRelax\Model\Order::STATUS_CANCELED:
                     $result = true;
                     $this->setLastError();
                     break;
                 case \BtcRelax\Model\Order::STATUS_FINISHED:
-                case \BtcRelax\Model\Order::STATUS_PAID:                    
+                case \BtcRelax\Model\Order::STATUS_PAID:
                     $this->setLastError("Order cannot be canceled from that state");
                     break;
                 default:
-                    if ($vAM->isUserHasRight('CANCEL_ORDER',$pUser)) {
+                    if ($vAM->isUserHasRight('CANCEL_ORDER', $pUser)) {
                         $vOrderId = $pOrder->getIdOrder();
                         $vOrderDao = new \BtcRelax\Dao\OrderDao();
                         $result = $vOrderDao->cancelOrder($vOrderId);
-                        if ($result === true) { $this->setCurrentOrder(); $this->setLastError(); }
-                        else { $this->setLastError("Error when cancel procedure called"); }
-                    } else { $this->setLastError("You have not rights to cancel order!"); }
+                        if ($result === true) {
+                            $this->setCurrentOrder();
+                            $this->setLastError();
+                        } else {
+                            $this->setLastError("Error when cancel procedure called");
+                        }
+                    } else {
+                        $this->setLastError("You have not rights to cancel order!");
+                    }
                     break;
                 }
-        }  else { $this->setLastError("Order not found");}
+        } else {
+            $this->setLastError("Order not found");
+        }
         return $result;
     }
 
     
     /// Cancel order if possible, in another case return false
-    public function cancelOrder() {
+    public function cancelOrder()
+    {
         $vOrder = $this->getActualOrder();
         $result = !is_numeric($vOrder->getIdOrder());
         if (!$result) {
-            if ($vOrder->getState() === \BtcRelax\Model\Order::STATUS_FINISHED)
-            { $result = true; } 
-            else {
+            if ($vOrder->getState() === \BtcRelax\Model\Order::STATUS_FINISHED) {
+                $result = true;
+            } else {
                 $vAM = \BtcRelax\Core::createAM();
                 if ($vAM->isUserHasRight('CANCEL_ORDER')) {
-                  $vCurrentId = $vOrder->getIdOrder();
-                  $vOrderDao = new \BtcRelax\Dao\OrderDao();
-                  $result   = $vOrderDao->cancelOrder($vCurrentId);
-                  if ($result) {                  
-                    $vOrderUpdated = $this->getOrderById($vCurrentId);
-                    $this->setCurrentOrder($vOrderUpdated); }
-                } else { $this->setLastError("Does not have access rights!"); } }
+                    $vCurrentId = $vOrder->getIdOrder();
+                    $vOrderDao = new \BtcRelax\Dao\OrderDao();
+                    $result   = $vOrderDao->cancelOrder($vCurrentId);
+                    if ($result) {
+                        $vOrderUpdated = $this->getOrderById($vCurrentId);
+                        $this->setCurrentOrder($vOrderUpdated);
+                    }
+                } else {
+                    $this->setLastError("Does not have access rights!");
+                }
+            }
         }
-        if  ($result) {
+        if ($result) {
             $this->getCurrentSession()->clearValue('CurrentOrder');
             $this->setLastError("");
         }
@@ -186,7 +218,8 @@ class OM implements IOM {
     
     
     
-    public function renderGetCurrentPaymentProviders() {
+    public function renderGetCurrentPaymentProviders()
+    {
         $pPaymentProviders = [];
         $vCollection = $this->actionGetCurrentPaymentProviders();
         foreach ($vCollection as $provider) {
@@ -203,7 +236,8 @@ class OM implements IOM {
         return $pPaymentProviders;
     }
 
-    public function tryConfirmOrder() {
+    public function tryConfirmOrder()
+    {
         try {
             $vOrder = $this->getActualOrder();
             $orderDao = new \BtcRelax\Dao\OrderDao(null, false);
@@ -242,47 +276,53 @@ class OM implements IOM {
         return isset($result) ? $result : false;
     }
 
-    public function notifyDropers(array $pUserPointsList) {
-        foreach ($pUserPointsList as $vUserPoint ) {
+    public function notifyDropers(array $pUserPointsList)
+    {
+        foreach ($pUserPointsList as $vUserPoint) {
             $pUserId = $vUserPoint['CustomerId'];
             $vAM = \BtcRelax\Core::createAM();
             $vNotificator = $vAM->getUserNotificatorByUserId($pUserId);
-            if (FALSE !== $vNotificator) {
-                $vMsg = \sprintf("Ваша закладка №:%s была только что заказанна. Проверьте её состояние.",$vUserPoint['BookmarkId'] );
+            if (false !== $vNotificator) {
+                $vMsg = \sprintf("Ваша закладка №:%s была только что заказанна. Проверьте её состояние.", $vUserPoint['BookmarkId']);
                 $vNotificator->pushMessage($vMsg);
-                \BtcRelax\Log::general( \sprintf("Pushed message:%s", $vMsg), \BtcRelax\Log::INFO  );
+                \BtcRelax\Log::general(\sprintf("Pushed message:%s", $vMsg), \BtcRelax\Log::INFO);
                 $this->setLastError();
-            } else { $this->setLastError(\sprintf("Error getting notificator for saller id: %s", $pUserId));  }
+            } else {
+                $this->setLastError(\sprintf("Error getting notificator for saller id: %s", $pUserId));
+            }
         }
     }
     
-    public function setOrder(array $pParams) {
+    public function setOrder(array $pParams)
+    {
         // Need to check are that owner try to change order
         $result = false;
         if (!count($pParams) > 0) {
-            $this->setLastError("Error while setting order. 0 arguments passed in, when call setOrder method");} 
-            else { 
-                $vOrder = $this->getActualOrder();
-                $vSession = $this->getCurrentSession();
-                foreach ($pParams as $key => $value) {
-                 switch ($key) {
+            $this->setLastError("Error while setting order. 0 arguments passed in, when call setOrder method");
+        } else {
+            $vOrder = $this->getActualOrder();
+            $vSession = $this->getCurrentSession();
+            foreach ($pParams as $key => $value) {
+                switch ($key) {
                     case 'pProvider':
                         $vProviders = $this->actionGetCurrentPaymentProviders();
                         foreach ($vProviders as $cProvider) {
                             if ($cProvider->getProviderCode() === $value) {
                                 $vRE = \BtcRelax\Core::createRE();
                                 $vInvoice = $vRE->createInvoice($vOrder, $cProvider);
-                                if ($vInvoice instanceof \BtcRelax\Model\Invoice ) {
+                                if ($vInvoice instanceof \BtcRelax\Model\Invoice) {
                                     $vInvoice->setPaymentProvider($cProvider);
                                     $vOrder->addInvoice($vInvoice);
                                     $vSession->clearValue('CurrentPaymentProviders');
                                     $vOrder->setState(\BtcRelax\Model\Order::STATUS_PREPARING);
                                     $this->setCurrentOrder($vOrder);
-                                    $result = true;                                
-                                } else { 
-                                    $this->setLastError(\sprintf("Error while creating invoice for payment provider: %s",$value ));
+                                    $result = true;
+                                } else {
+                                    $this->setLastError(\sprintf("Error while creating invoice for payment provider: %s", $value));
                                 }
-                                break;} } break;
+                                break;
+                            }
+                        } break;
                     case 'idBookmark':
                         if (!$vOrder->isHasBookmarkId($value)) {
                             $vAM = \BtcRelax\Core::createAM();
@@ -297,11 +337,14 @@ class OM implements IOM {
                                 $vOrder->addBookmark($vBookmark);
                                 $vOrder->setState(\BtcRelax\Model\Order::STATUS_CREATED);
                                 $this->setCurrentOrder($vOrder);
-                                $result = true;} 
-                            else { 
+                                $result = true;
+                            } else {
                                 $this->setLastError("Bookmark already changed state!");
-                                $result = false;}
-                            } else { $result = true; } break;
+                                $result = false;
+                            }
+                        } else {
+                            $result = true;
+                        } break;
                     case 'confirmOrder': $result = $this->tryConfirmOrder();
                         break;
                     case 'cancelOrder': $result = $this->cancelOrder();
@@ -324,24 +367,31 @@ class OM implements IOM {
         return $result;
     }
 
-    public static function orderById(int $orderId):\BtcRelax\Model\Order {
+    public static function orderById(int $orderId):\BtcRelax\Model\Order
+    {
         $dao = new \BtcRelax\Dao\OrderDao();
         $vOrder = $dao->findById($orderId);
         return \BtcRelax\OM::initOrder($vOrder);
     }
             
             
-    public function getOrderById($orderId) {
+    public function getOrderById($orderId)
+    {
         $dao = new \BtcRelax\Dao\OrderDao();
         $result = $dao->findById($orderId);
         return $result;
     }
 
-    public function renderActiveOrder() {
-        $result = []; $vOrder = $this->getActualOrder();
+    public function renderActiveOrder()
+    {
+        $result = [];
+        $vOrder = $this->getActualOrder();
         if (\FALSE !== $vOrder) {
-            $vOrderState = $vOrder->getState(); $result += ["OrderState" => $vOrderState];
-            if (!empty($vOrder->getIdOrder())) { $result += ["OrderId" => $vOrder->getIdOrder()];}
+            $vOrderState = $vOrder->getState();
+            $result += ["OrderState" => $vOrderState];
+            if (!empty($vOrder->getIdOrder())) {
+                $result += ["OrderId" => $vOrder->getIdOrder()];
+            }
             $vPM = \BtcRelax\Core::createPM();
             $vBookmarksList = $vPM->renderGetOrderBookmarks($vOrder);
             $result += ["CurrentBookmarks" => $vBookmarksList];
@@ -369,7 +419,8 @@ class OM implements IOM {
         return $result;
     }
 
-    public function renderOrderInvoice() {
+    public function renderOrderInvoice()
+    {
         $invoiceInfo = [];
         $vOrder = $this->getActualOrder();
         foreach ($vOrder->getInvoices() as $vInvoice) {
@@ -378,17 +429,20 @@ class OM implements IOM {
         return $invoiceInfo;
     }
 
-    public function getOrdersByUser( \BtcRelax\Model\User $pUser = null,$onlyActive = true) {
+    public function getOrdersByUser(\BtcRelax\Model\User $pUser = null, $onlyActive = true)
+    {
         $result = false;
         /* @var $onlyActive boolean */
         $vAM = \BtcRelax\Core::createAM();
-        if (empty($pUser)) {  $pUser = $vAM->getUser(); }
+        if (empty($pUser)) {
+            $pUser = $vAM->getUser();
+        }
         $vCustomerId = $pUser->getIdCustomer();
         $orderSearchCriteria = new \BtcRelax\Dao\OrderSearchCriteria($vCustomerId, $onlyActive);
         $dao = new \BtcRelax\Dao\OrderDao();
         $founded = $dao->find($orderSearchCriteria);
         if (count($founded) > 0) {
-            $activeOrder = reset($founded);            
+            $activeOrder = reset($founded);
             $vPM = \BtcRelax\Core::createPM();
             $vRE = \BtcRelax\Core::createRE();
             $vBookmarks = $vPM->actionGetOrderBookmarks($activeOrder);
@@ -403,7 +457,8 @@ class OM implements IOM {
         return $result;
     }
 
-    public static function initOrder(\BtcRelax\Model\Order $pOrder): \BtcRelax\Model\Order {
+    public static function initOrder(\BtcRelax\Model\Order $pOrder): \BtcRelax\Model\Order
+    {
         $vAM = \BtcRelax\Core::createAM();
         $vPM = \BtcRelax\Core::createPM();
         $vRE = \BtcRelax\Core::createRE();
@@ -417,7 +472,8 @@ class OM implements IOM {
         return ($pOrder);
     }
 
-    public function unlockBookmark($value) {
+    public function unlockBookmark($value)
+    {
         $vOrder = $this->getActualOrder();
         $vBookmarkId = (int) $value;
         $vPM = \BtcRelax\Core::createPM();
@@ -425,7 +481,8 @@ class OM implements IOM {
         return $result;
     }
 
-    public function renderBookmarksForConfirm($vBookmarksList) {
+    public function renderBookmarksForConfirm($vBookmarksList)
+    {
         $result = [];
         foreach ($vBookmarksList as $cBookmark) {
             if ($cBookmark["Unlocked"]) {
@@ -435,7 +492,8 @@ class OM implements IOM {
         return $result;
     }
 
-    public function renderBookmarksForUnlock($vBookmarksList) {
+    public function renderBookmarksForUnlock($vBookmarksList)
+    {
         $result = [];
         foreach ($vBookmarksList as $cBookmark) {
             if (!$cBookmark["Unlocked"]) {
@@ -445,7 +503,8 @@ class OM implements IOM {
         return $result;
     }
 
-    public function bookmarkCatched($value) {
+    public function bookmarkCatched($value)
+    {
         $vOrder = $this->getActualOrder();
         $vBookmarkId = (int) $value;
         $vPM = \BtcRelax\Core::createPM();
@@ -468,7 +527,8 @@ class OM implements IOM {
         return $result;
     }
 
-    public function finishOrder() {
+    public function finishOrder()
+    {
         $result = false;
         $vOrder = $this->getActualOrder();
         if ($vOrder instanceof \BtcRelax\Model\Order) {
@@ -483,31 +543,36 @@ class OM implements IOM {
         return $result;
     }
 
-    public function getOrderInfoById($vParams) {
-        if (\is_int($vParams)) { $pId = $vParams; } else { $pId = $vParams['id']; }
+    public function getOrderInfoById($vParams)
+    {
+        if (\is_int($vParams)) {
+            $pId = $vParams;
+        } else {
+            $pId = $vParams['id'];
+        }
         $pOrder = $this->getOrderById($pId);
-        if (\FALSE !== $pOrder ) {
-            \BtcRelax\Log::general(\sprintf('OM getting info for order id:%s',$pId), \BtcRelax\Log::INFO );
-			$vOrderDao = new \BtcRelax\Dao\OrderDao(); 
-                        $vSearchCriteria = new \BtcRelax\Dao\OrderSearchCriteria();
-                        $vSearchCriteria->setOrderId($pId);
-			$vSearchCriteriaI = new \BtcRelax\Dao\InvoiceSearchCriteria(["idOrder" => $pId, "isActive" => false]);
-                        $vInvoiceDao = new \BtcRelax\Dao\InvoiceDao();
-                        $vOrder = $vOrderDao->fullOrders($vSearchCriteria);
-			$vInvoice = $vInvoiceDao->fullInvoices($vSearchCriteriaI);
-			$result  = [ "order" => $vOrder[0], "invoice" => $vInvoice[0] ];
-			\BtcRelax\Log::general(\sprintf('OM order info:%s',\json_encode($result)), \BtcRelax\Log::INFO ); 
-        } else { $this->setLastError(\sprintf("Order with id:%s not found",$pId)) ; $result = ["error"=> $this->getLastError()]; }
+        if (\FALSE !== $pOrder) {
+            \BtcRelax\Log::general(\sprintf('OM getting info for order id:%s', $pId), \BtcRelax\Log::INFO);
+            $vOrderDao = new \BtcRelax\Dao\OrderDao();
+            $vSearchCriteria = new \BtcRelax\Dao\OrderSearchCriteria();
+            $vSearchCriteria->setOrderId($pId);
+            $vSearchCriteriaI = new \BtcRelax\Dao\InvoiceSearchCriteria(["idOrder" => $pId, "isActive" => false]);
+            $vInvoiceDao = new \BtcRelax\Dao\InvoiceDao();
+            $vOrder = $vOrderDao->fullOrders($vSearchCriteria);
+            $vInvoice = $vInvoiceDao->fullInvoices($vSearchCriteriaI);
+            $result  = [ "order" => $vOrder[0], "invoice" => $vInvoice[0] ];
+            \BtcRelax\Log::general(\sprintf('OM order info:%s', \json_encode($result)), \BtcRelax\Log::INFO);
+        } else {
+            $this->setLastError(\sprintf("Order with id:%s not found", $pId)) ;
+            $result = ["error"=> $this->getLastError()];
+        }
         return $result;
-        
     }
     
-    public function getMaxOrderId() {
+    public function getMaxOrderId()
+    {
         $vOrderDao = new \BtcRelax\Dao\OrderDao();
         $result = $vOrderDao->getMaxOrderId();
-        return $result;       
+        return $result;
     }
-
-
-
 }

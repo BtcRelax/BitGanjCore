@@ -4,28 +4,32 @@ namespace BtcRelax\Dao;
 
 use BtcRelax\Exception\NotFoundException;
 
-final class InvoiceDao extends \BtcRelax\Dao\BaseDao {
+final class InvoiceDao extends \BtcRelax\Dao\BaseDao
+{
 
 //            public function __construct($isAutocommit) {
 //                parent::__construct(null, $isAutocommit);
 //            }
 
 
-    public function insert(\BtcRelax\Model\Invoice $newInvoice) {
+    public function insert(\BtcRelax\Model\Invoice $newInvoice)
+    {
         $sql = 'INSERT INTO `Invoices`
                 (`idInvoices`,`Orders_idOrder`, `Currency`, `Price`, `PricingDate`, `InitialBallance`, `InvoiceAddress`,`InvoiceBalance`,`BalanceDate`,`CreateDate`,`InvoiceState`)
                 VALUES (:idInvoices, :idOrder, :Currency, :Price, :PricingDate , :InitialBallance, :InvoiceAddress , :InvoiceBalance , :BalanceDate , :CreateDate, :InvoiceState )';
         return $this->execute($sql, $newInvoice);
     }
 
-    public function save(\BtcRelax\Model\Invoice $pInvoice) {
+    public function save(\BtcRelax\Model\Invoice $pInvoice)
+    {
         if ($pInvoice->getIdInvoices() === null) {
             return $this->insert($pInvoice);
         }
         return $this->update($pInvoice);
     }
 
-    public function update(\BtcRelax\Model\Invoice $pInvoice) {
+    public function update(\BtcRelax\Model\Invoice $pInvoice)
+    {
         $sql = 'UPDATE `Invoices` SET
                     `InvoiceBalance` = :InvoiceBalance ,
                     `BalanceDate` = :BalanceDate,
@@ -39,7 +43,8 @@ final class InvoiceDao extends \BtcRelax\Dao\BaseDao {
      * @return Todo
      * @throws Exception
      */
-    public function execute($sql, \BtcRelax\Model\Invoice $vInvoice) {
+    public function execute($sql, \BtcRelax\Model\Invoice $vInvoice)
+    {
         $statement = $this->getDb()->prepare($sql);
         $this->executeStatement($statement, $this->getParams($vInvoice));
         if (!$vInvoice->getIdInvoices()) {
@@ -52,7 +57,8 @@ final class InvoiceDao extends \BtcRelax\Dao\BaseDao {
         return $vInvoice;
     }
 
-    public function getParams(\BtcRelax\Model\Invoice $vInvoice) {
+    public function getParams(\BtcRelax\Model\Invoice $vInvoice)
+    {
         $vEndDate = $vInvoice->getEndDate();
         $params = [
             ':idInvoices' => $vInvoice->getIdInvoices(),
@@ -78,32 +84,42 @@ final class InvoiceDao extends \BtcRelax\Dao\BaseDao {
         return $params;
     }
 
-    public function fullInvoices(\BtcRelax\Dao\InvoiceSearchCriteria $vSearch )
+    public function fullInvoices(\BtcRelax\Dao\InvoiceSearchCriteria $vSearch)
     {
-       $result = []; $filter = '';
-                $sql = "SELECT `Registered`, `idInvoices`, `IdOrder`, `ClientId`, `IdPoint`, `SallerId`, `InvoiceState`, "
+        $result = [];
+        $filter = '';
+        $sql = "SELECT `Registered`, `idInvoices`, `IdOrder`, `ClientId`, `IdPoint`, `SallerId`, `InvoiceState`, "
                     . "`InvoiceEndDate`, `PointState`, `PointEndDate`, `OrderState`, `OrderEndDate`, `Currency`, `Price`,"
                     . "`PricingDate`,  `InitialBallance`, `InvoiceAddress`, `InvoiceBalance`, `BalanceDate` FROM `vwInvoices` ";
-                if ($vSearch !== null) {
-                    if (!is_null($vSearch->getIdInvoice())) { $filter = $this->addToFilter($filter, sprintf('idInvoices = \'%s\'',$vSearch->getIdInvoice() ) );}
-                    if (!is_null($vSearch->getOrderId())) { $filter = $this->addToFilter($filter, sprintf('IdOrder = \'%s\'',$vSearch->getOrderId() ) ); }
-                    if (!is_null($vSearch->getClientId())) { $filter = $this->addToFilter($filter, sprintf('ClientId = \'%s\'',$vSearch->getClientId() )); }}
-                $sql .= $filter ; $cnt = 0;
-                foreach ($this->query($sql) as $row) {
-                    $vInvoice = [ $cnt => ["Registered"=> $row['Registered'], "idInvoices" => (int)$row['idInvoices'] , "IdOrder" => (int)$row['IdOrder'] , 
-                      "ClientId" => $row['ClientId'] , "IdPoint" => (int)$row['IdPoint'] , "SallerId" => $row['SallerId'] , "InvoiceState" => $row['InvoiceState'] , 
+        if ($vSearch !== null) {
+            if (!is_null($vSearch->getIdInvoice())) {
+                $filter = $this->addToFilter($filter, sprintf('idInvoices = \'%s\'', $vSearch->getIdInvoice()));
+            }
+            if (!is_null($vSearch->getOrderId())) {
+                $filter = $this->addToFilter($filter, sprintf('IdOrder = \'%s\'', $vSearch->getOrderId()));
+            }
+            if (!is_null($vSearch->getClientId())) {
+                $filter = $this->addToFilter($filter, sprintf('ClientId = \'%s\'', $vSearch->getClientId()));
+            }
+        }
+        $sql .= $filter ;
+        $cnt = 0;
+        foreach ($this->query($sql) as $row) {
+            $vInvoice = [ $cnt => ["Registered"=> $row['Registered'], "idInvoices" => (int)$row['idInvoices'] , "IdOrder" => (int)$row['IdOrder'] ,
+                      "ClientId" => $row['ClientId'] , "IdPoint" => (int)$row['IdPoint'] , "SallerId" => $row['SallerId'] , "InvoiceState" => $row['InvoiceState'] ,
                         "InvoiceEndDate" => $row['InvoiceEndDate'] ,"PointState" => $row['PointState'] ,"PointEndDate" => $row['PointEndDate'] ,
-                        "OrderState" => $row['OrderState'] ,"OrderEndDate" => $row['OrderEndDate'] , "Currency" => $row['Currency'], 
+                        "OrderState" => $row['OrderState'] ,"OrderEndDate" => $row['OrderEndDate'] , "Currency" => $row['Currency'],
                         "Price" => $row['Price'], "PricingDate" => $row['PricingDate'],  "InitialBallance" => $row['InitialBallance'] ,
                         "InvoiceAddress" => $row['InvoiceAddress'], "InvoiceBalance" => $row['InvoiceBalance'] ,
                         "BalanceDate" => $row['BalanceDate'], ] ] ;
-                    $cnt = $cnt +1;
-                    $result += $vInvoice;
-                } 
-    return $result;
+            $cnt = $cnt +1;
+            $result += $vInvoice;
+        }
+        return $result;
     }
                 
-    public function getInvoices(\BtcRelax\Dao\InvoiceSearchCriteria $vSearch) {
+    public function getInvoices(\BtcRelax\Dao\InvoiceSearchCriteria $vSearch)
+    {
         $result = [];
         $filter = '';
         $sql = "SELECT `vwInvoices`.`Registered`, `vwInvoices`.`idInvoices`, `vwInvoices`.`InvoiceState`,
@@ -136,7 +152,8 @@ final class InvoiceDao extends \BtcRelax\Dao\BaseDao {
         return $result;
     }
 
-    public function find(\BtcRelax\Dao\InvoiceSearchCriteria $search = null) {
+    public function find(\BtcRelax\Dao\InvoiceSearchCriteria $search = null)
+    {
         $result = [];
         $cnt = 0;
         foreach ($this->query($this->getFindSql($search)) as $row) {
@@ -148,7 +165,8 @@ final class InvoiceDao extends \BtcRelax\Dao\BaseDao {
         return $result;
     }
 
-    private function getFindSql(\BtcRelax\Dao\InvoiceSearchCriteria $search = null) {
+    private function getFindSql(\BtcRelax\Dao\InvoiceSearchCriteria $search = null)
+    {
         $sql = "SELECT `idInvoices`,`Orders_idOrder`, `Currency`, `Price`, `PricingDate`, `InitialBallance`, `InvoiceAddress`, `InvoiceBalance`,"
                 . "`BalanceDate`, `CreateDate`, `EndDate`, `InvoiceState` FROM `Invoices` ";
         $orderBy = 'CreateDate';
@@ -190,7 +208,8 @@ final class InvoiceDao extends \BtcRelax\Dao\BaseDao {
         return $sql;
     }
 
-    public function findById($id) {
+    public function findById($id)
+    {
         $result = false;
         $row = $this::query(\sprintf("SELECT `idInvoices`,`Orders_idOrder`, `Currency`, `Price`, `PricingDate`, `InitialBallance`, `InvoiceAddress`, `InvoiceBalance`,"
                                 . "`BalanceDate`, `CreateDate`, `EndDate`, `InvoiceState` FROM `Invoices`  WHERE idInvoices = '%s' LIMIT 1 ", $id))->fetch();
@@ -201,5 +220,4 @@ final class InvoiceDao extends \BtcRelax\Dao\BaseDao {
         }
         return $result;
     }
-
 }

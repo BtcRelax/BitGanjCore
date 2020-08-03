@@ -21,8 +21,8 @@ This program is free software: you can redistribute it and/or modify
  *
  * @author Matej Danter
  */
-interface PublicKeyInterface {
-    
+interface PublicKeyInterface
+{
     public function __construct(Point $generator, Point $point);
 
     public function verifies($hash, Signature $signature);
@@ -32,6 +32,4 @@ interface PublicKeyInterface {
     public function getGenerator();
 
     public function getPoint();
-
 }
-?>

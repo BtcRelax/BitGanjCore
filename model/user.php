@@ -11,66 +11,76 @@ use BtcRelax\Mapping\CustomerMapper;
 use BtcRelax\Utils;
 use LogicException;
 
-class User extends Customer {
+class User extends Customer
+{
     private $xPub;
     private $InvoicesCount = -1;
     protected $_rights = array();
     protected $_properties = array();
     protected $_identifiers = array();
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
     
-    public function getIdentifiers() {
+    public function getIdentifiers()
+    {
         return $this->_identifiers;
     }
 
-    public static function createNew() {
-			$instance = new self();
-                        $bitid = new BitID();
-                        $vNewUserId = $bitid->generateNonce(10);
-			$instance->setIdCustomer($vNewUserId);
-			return $instance;
+    public static function createNew()
+    {
+        $instance = new self();
+        $bitid = new BitID();
+        $vNewUserId = $bitid->generateNonce(10);
+        $instance->setIdCustomer($vNewUserId);
+        return $instance;
     }
     
-    public function getHiddenCustomerId()   {
-        return \sprintf("%s****%s", \substr($this->getIdCustomer(), 0, 4), \substr($this->getIdCustomer(), -4,4));
+    public function getHiddenCustomerId()
+    {
+        return \sprintf("%s****%s", \substr($this->getIdCustomer(), 0, 4), \substr($this->getIdCustomer(), -4, 4));
     }
     
-    public function setIdentifiers($_identifiers) {
+    public function setIdentifiers($_identifiers)
+    {
         $this->_identifiers = $_identifiers;
     }
         
-    private function isPropertyExists($pPropertyName)    {
+    private function isPropertyExists($pPropertyName)
+    {
         $result = array_key_exists($pPropertyName, $this->_properties);
         return $result;
     }
 
-    public function getPropertyValue($pPropertyName)    {
+    public function getPropertyValue($pPropertyName)
+    {
         $result = $this->isPropertyExists($pPropertyName);
-        if ($result)        
-        {
+        if ($result) {
             $prop = $this->_properties[$pPropertyName];
             $result = $prop->getPropertyValue();
-            
         }
         return $result;
     }
 
-    public function getRights() {
+    public function getRights()
+    {
         return $this->_rights;
     }
     
-    public function setRights($rights) {
+    public function setRights($rights)
+    {
         $this->_rights = $rights;
     }
 
-    public function getProperties() {
+    public function getProperties()
+    {
         return $this->_properties;
     }
 
-    public function setProperties($_properties) {
+    public function setProperties($_properties)
+    {
         $vProperties = [];
         foreach ($_properties as $prop) {
             $vProperties +=  [$prop->getPropertyTypeCode() => $prop];
@@ -78,15 +88,17 @@ class User extends Customer {
         $this->_properties = $vProperties;
     }
   
-    public function getIsSignedIn() {
+    public function getIsSignedIn()
+    {
         return !empty($this->m_idCustomer);
     }
 
-    public function init($userId) {
+    public function init($userId)
+    {
         $custDao = new CustomerDao();
         $vCustomerRow = $custDao->findById($userId);
-        if (FALSE !==$vCustomerRow)
-        {   CustomerMapper::map($this, $vCustomerRow);
+        if (false !==$vCustomerRow) {
+            CustomerMapper::map($this, $vCustomerRow);
             $dao = new CustomerRightsDao();
             $vRights = $dao->findById($userId);
             $this->setRights($vRights);
@@ -98,57 +110,68 @@ class User extends Customer {
             $vIdentifiers = $dao3->find($vSearch);
             $this->setIdentifiers($vIdentifiers);
             return $this;
-        } else {       
-            throw new \LogicException(\sprintf('Customer with Id:%s was not found.', $userId ));
+        } else {
+            throw new \LogicException(\sprintf('Customer with Id:%s was not found.', $userId));
         }
     }
         
-    function getXPub() {
+    public function getXPub()
+    {
         return $this->xPub;
     }
 
-    function getInvoicesCount() {
+    public function getInvoicesCount()
+    {
         return $this->InvoicesCount;
     }
 
-    function setXPub($xPub) {
+    public function setXPub($xPub)
+    {
         $this->xPub = $xPub;
     }
 
-    function setInvoicesCount($InvoicesCount) {
+    public function setInvoicesCount($InvoicesCount)
+    {
         $this->InvoicesCount = $InvoicesCount;
     }
 
-    public function getUserNameAlias () {
-       if ($this->isPropertyExists("alias_nick"))
-       { return $this->getPropertyValue("alias_nick"); } 
-       else  { return $this->getHiddenCustomerId();  }
+    public function getUserNameAlias()
+    {
+        if ($this->isPropertyExists("alias_nick")) {
+            return $this->getPropertyValue("alias_nick");
+        } else {
+            return $this->getHiddenCustomerId();
+        }
     }
     
     
-    public function getUserHash() {
+    public function getUserHash()
+    {
         $cId = $this->customer->getIdCustomer();
         $vBegin = substr($cId, 1, 9);
         return $vBegin;
     }
 
-    public function RegisterNewUserId(Identicator $Identity) {
+    public function RegisterNewUserId(Identicator $Identity)
+    {
         $custDao = new CustomerDao();
-          $bitid = new BitID();
-          $nonce = $bitid->generateNonce(10);
-          $result = $custDao->registerUserId($Identity->getIdentTypeCode(), $Identity->getIdentityKey(),$nonce);
+        $bitid = new BitID();
+        $nonce = $bitid->generateNonce(10);
+        $result = $custDao->registerUserId($Identity->getIdentTypeCode(), $Identity->getIdentityKey(), $nonce);
         return $result;
     }
     
-    private function renderUserProperties() {
-        $vResult = []; 
+    private function renderUserProperties()
+    {
+        $vResult = [];
         foreach ($this->_properties as $prop) {
             $vResult += [$prop->getPropertyTypeCode() => [$prop->getPropertyValue(), $prop->getPropertyTypeTitle()]];
         }
         return $vResult;
     }
     
-    private function renderUserRights() {
+    private function renderUserRights()
+    {
         $vResult = [];
         foreach ($this->_rights as $right) {
             $vResult += [$right->getRightCode() => $right->getRightDescription()];
@@ -156,7 +179,8 @@ class User extends Customer {
         return $vResult;
     }
 
-    private function renderUserIdentifiers() {
+    private function renderUserIdentifiers()
+    {
         $vResult = [];
         foreach ($this->_identifiers as $ident) {
             $vResult += ["IdentType" => $ident->getIdentTypeCode(), "IdentKey" => $ident->getIdentityKey(), "IdentState" => $ident->getAuthenticationState() ];
@@ -174,7 +198,8 @@ class User extends Customer {
         return $result;
     }
     
-    public function __toString() {
+    public function __toString()
+    {
         $result = parent::__toString();
         $result .= \sprintf(" Properties: [%s]", Utils::toJson($this->renderUserProperties()));
         $result .= \sprintf(" Rights: [%s]", Utils::toJson($this->renderUserRights()));

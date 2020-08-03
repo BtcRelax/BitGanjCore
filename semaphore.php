@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * Semaphore class
  *
@@ -11,175 +11,181 @@
  * @package  Semaphore
  * @access   public
  */
-class Semaphore {
+class Semaphore
+{
 
   //-- Properties -----------------------------------------------------
-  //-- Please access properties only by related methods ---------------
+    //-- Please access properties only by related methods ---------------
 
-  /**
-   * Path to lock file
-   *
-   * @var path string  
-   * @access private
-   */
-  var $path;
+    /**
+     * Path to lock file
+     *
+     * @var path string
+     * @access private
+     */
+    public $path;
 
-  /**
-   * Process identity
-   *
-   * @var name string  
-   * @access private
-   */
-  var $name;
+    /**
+     * Process identity
+     *
+     * @var name string
+     * @access private
+     */
+    public $name;
 
-  /**
-   * Lock file name
-   *
-   * @var name string  
-   * @access private
-   */
-  var $fname;
+    /**
+     * Lock file name
+     *
+     * @var name string
+     * @access private
+     */
+    public $fname;
 
-  /**
-   *  Process timeout
-   *
-   * @var timeout integer   
-   * @access private
-   */
-  var $timeout;
+    /**
+     *  Process timeout
+     *
+     * @var timeout integer
+     * @access private
+     */
+    public $timeout;
 
-  //------------------- Methods ----------------------------------------
+    //------------------- Methods ----------------------------------------
 
-  /**
-   * Constructor creates object
-   *
-   * @param $name String Process identity
-   * @param $path String Lock file place, default to /tmp
-   * @access public
-   */
-  function Semaphore($name,$path='/tmp') {
-    $this->timeout = 5;
-    $this->path = $path;
-    $this->fname = md5($name) . ".sem.tmp"; 
-  }
-
-
-  /**
-   * Is the process locked or not and if not then lock it 
-   *
-   * @return boolean
-   * @access public
-   * @return void   
-   */
-  function lock() {
-    $lf = $this->fname;
-    $curDir = getcwd();
-    chdir($this->path);
-    if (file_exists($lf)) {
-      $delta = time() - filectime($lf) - $this->timeout;
-      if ( $delta > 0 ) {
-        $fp = fopen($lf,"w");
-        fwrite($fp,"1");
-        fclose($fp);
-        chdir($curDir); 
-        return TRUE;
-      }
-      else {
-        chdir($curDir);
-        return FALSE;
-      }  
-    } 
-    else {
-      $fp = fopen($lf,"w");
-      fwrite($fp,"1");
-      fclose($fp);
-      chdir($curDir); 
-      return TRUE;
+    /**
+     * Constructor creates object
+     *
+     * @param $name String Process identity
+     * @param $path String Lock file place, default to /tmp
+     * @access public
+     */
+    public function Semaphore($name, $path='/tmp')
+    {
+        $this->timeout = 5;
+        $this->path = $path;
+        $this->fname = md5($name) . ".sem.tmp";
     }
-  }
 
-  /**
-   * Unlocks process
-   *
-   * @access  public
-   * @return void
-   */
-  function unlock() {
-    $lf = $this->fname;
-    $curDir = getcwd();
-    chdir($this->path);
-    if (file_exists($lf)) {
-      unlink($lf);
-      chdir($curDir); 
+
+    /**
+     * Is the process locked or not and if not then lock it
+     *
+     * @return boolean
+     * @access public
+     * @return void
+     */
+    public function lock()
+    {
+        $lf = $this->fname;
+        $curDir = getcwd();
+        chdir($this->path);
+        if (file_exists($lf)) {
+            $delta = time() - filectime($lf) - $this->timeout;
+            if ($delta > 0) {
+                $fp = fopen($lf, "w");
+                fwrite($fp, "1");
+                fclose($fp);
+                chdir($curDir);
+                return true;
+            } else {
+                chdir($curDir);
+                return false;
+            }
+        } else {
+            $fp = fopen($lf, "w");
+            fwrite($fp, "1");
+            fclose($fp);
+            chdir($curDir);
+            return true;
+        }
     }
-    else {
-      chdir($curDir);
-      die("ERROR: Attempt to unlink nonexistent file!");
-    } 
-  }
 
-  /**
-   * Sets lock timeout  
-   *
-   * @param integer Timeout in seconds
-   * @access  public
-   * @return void
-   */
-  function setTimeout($val) {
-    $this->timeout = $val;
-  }
+    /**
+     * Unlocks process
+     *
+     * @access  public
+     * @return void
+     */
+    public function unlock()
+    {
+        $lf = $this->fname;
+        $curDir = getcwd();
+        chdir($this->path);
+        if (file_exists($lf)) {
+            unlink($lf);
+            chdir($curDir);
+        } else {
+            chdir($curDir);
+            die("ERROR: Attempt to unlink nonexistent file!");
+        }
+    }
 
-  /**
-   * Returns lock timeout
-   * 
-   * @return integer Timeout in seconds
-   * @access  public
-   */
-  function getTimeout() {
-    return $this->timeout;
-  }
+    /**
+     * Sets lock timeout
+     *
+     * @param integer Timeout in seconds
+     * @access  public
+     * @return void
+     */
+    public function setTimeout($val)
+    {
+        $this->timeout = $val;
+    }
 
-  /**
-   * Sets process identity  
-   *
-   * @param string Identity
-   * @access  public
-   * @return void
-   */
-  function setName($val) {
-    $this->name = $val;
-  }
+    /**
+     * Returns lock timeout
+     *
+     * @return integer Timeout in seconds
+     * @access  public
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
+    }
 
-  /**
-   * Returns process identity
-   *
-   * @return string Identity
-   * @access  public
-   */
-  function getName() {
-    return $this->name;
-  } 
+    /**
+     * Sets process identity
+     *
+     * @param string Identity
+     * @access  public
+     * @return void
+     */
+    public function setName($val)
+    {
+        $this->name = $val;
+    }
 
-  /**
-   * Sets lock file place
-   *
-   * @param string
-   * @access  public
-   * @return void
-   */
-  function setPath($val) {
-    $this->path = $val;
-  }
+    /**
+     * Returns process identity
+     *
+     * @return string Identity
+     * @access  public
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 
-  /**
-   * Returns lock file place
-   *
-   * @return string Path to lock file directory
-   * @access  public
-   */
+    /**
+     * Sets lock file place
+     *
+     * @param string
+     * @access  public
+     * @return void
+     */
+    public function setPath($val)
+    {
+        $this->path = $val;
+    }
 
-  function getPath() {
-    return $this->path;
-  }
+    /**
+     * Returns lock file place
+     *
+     * @return string Path to lock file directory
+     * @access  public
+     */
+
+    public function getPath()
+    {
+        return $this->path;
+    }
 }
-?>

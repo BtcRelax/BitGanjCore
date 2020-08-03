@@ -8,18 +8,21 @@
 
 namespace BtcRelax;
 
-class Request {
+class Request
+{
     private $id;
     private $header;
     private $body;
 
-    function __construct() {
+    public function __construct()
+    {
         $this->id = \BtcRelax\Utils::generateNonce();
         $this->header = \BtcRelax\Utils::getHeaders();
         $this->body = \BtcRelax\Utils::getRequestParams();
     }
     
-    public function isCanAcceptHtml() {
+    public function isCanAcceptHtml()
+    {
         if (\array_key_exists("Accept", $this->header)) {
             $vAS = $this->header["Accept"];
             return \strpos($vAS, "text/html") !== false ? true: false ;
@@ -29,7 +32,8 @@ class Request {
     }
     
     
-    public function getHeaderByKey($keyName) {
+    public function getHeaderByKey($keyName)
+    {
         $result = false;
         if (array_key_exists($keyName, $this->header)) {
             $result = $this->header[$keyName];
@@ -37,7 +41,8 @@ class Request {
         return $result;
     }
 
-    public function getParamByKey($keyName) {
+    public function getParamByKey($keyName)
+    {
         $result = false;
         if (array_key_exists($keyName, $this->body)) {
             $result = $this->body[$keyName];
@@ -45,26 +50,30 @@ class Request {
         return $result;
     }
     
-    private function isApiCall() {
-        return \array_key_exists("api",$this->body) || \array_key_exists("api", $this->header);
+    private function isApiCall()
+    {
+        return \array_key_exists("api", $this->body) || \array_key_exists("api", $this->header);
     }
 
-    public function getApiClassName():string {
+    public function getApiClassName():string
+    {
         if ($this->isApiCall()) {
-            return \sprintf("\BtcRelax\api\%s", $this->getBody()["api"] );
+            return \sprintf("\BtcRelax\api\%s", $this->getBody()["api"]);
         }
     }
     
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getHeader() {
+    public function getHeader()
+    {
         return $this->header;
     }
 
-    public function getBody() {
+    public function getBody()
+    {
         return $this->body;
     }
-
 }

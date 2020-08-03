@@ -26,24 +26,26 @@ This program is free software: you can redistribute it and/or modify
  *
  * @author Matej Danter
  */
-class EcDH implements EcDHInterface {
-
+class EcDH implements EcDHInterface
+{
     private $generator;
     private $pubPoint;
     private $receivedPubPoint;
     private $secret;
     private $agreed_key;
 
-    public function __construct(Point $g) {
+    public function __construct(Point $g)
+    {
         $this->generator = $g;
     }
 
-    public function calculateKey() {
-
+    public function calculateKey()
+    {
         $this->agreed_key = Point::mul($this->secret, $this->receivedPubPoint)->getX();
     }
 
-    public function getPublicPoint() {
+    public function getPublicPoint()
+    {
         if (extension_loaded('gmp') && USE_EXT == 'GMP') {
             //alice selects a random number between 1 and the order of the generator point(private)
             $n = $this->generator->getOrder();
@@ -54,7 +56,7 @@ class EcDH implements EcDHInterface {
             $this->pubPoint = Point::mul($this->secret, $this->generator);
 
             return $this->pubPoint;
-        } else if (extension_loaded('bcmath') && USE_EXT == 'BCMATH') {
+        } elseif (extension_loaded('bcmath') && USE_EXT == 'BCMATH') {
             //alice selects a random number between 1 and the order of the generator point(private)
             $n = $this->generator->getOrder();
 
@@ -69,11 +71,13 @@ class EcDH implements EcDHInterface {
         }
     }
 
-    public function setPublicPoint(Point $q) {
+    public function setPublicPoint(Point $q)
+    {
         $this->receivedPubPoint = $q;
     }
 
-    public function encrypt($string) {
+    public function encrypt($string)
+    {
         $key = hash("sha256", $this->agreed_key, true);
 
         $cypherText = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, base64_encode($string), MCRYPT_MODE_CBC, $key);
@@ -81,15 +85,16 @@ class EcDH implements EcDHInterface {
         return $cypherText;
     }
 
-    public function decrypt($string) {
+    public function decrypt($string)
+    {
         $key = hash("sha256", $this->agreed_key, true);
 
         $clearText = base64_decode(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $string, MCRYPT_MODE_CBC, $key));
         return $clearText;
     }
 
-    public function encryptFile($path) {
-
+    public function encryptFile($path)
+    {
         if (file_exists($path)) {
             $string = file_get_contents($path);
 
@@ -101,8 +106,8 @@ class EcDH implements EcDHInterface {
         }
     }
 
-    public function decryptFile($path) {
-
+    public function decryptFile($path)
+    {
         if (file_exists($path)) {
             $string = file_get_contents($path);
 
@@ -113,7 +118,4 @@ class EcDH implements EcDHInterface {
             return $clearText;
         }
     }
-
 }
-
-?>

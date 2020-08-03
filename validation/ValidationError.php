@@ -2,70 +2,61 @@
 
 namespace BtcRelax\Validation;
 
-
-
 /**
 
  * Validation error.
 
  */
 
-final class ValidationError {
-	private $source;
-	private $message;
+final class ValidationError
+{
+    private $source;
+    private $message;
 
-	/**
+    /**
 
-	 * Create new validation error.
+     * Create new validation error.
 
-	 * @param mixed $source source of the error
+     * @param mixed $source source of the error
 
-	 * @param string $message error message
+     * @param string $message error message
 
-	 */
+     */
 
-	function __construct($source, $message) {
+    public function __construct($source, $message)
+    {
+        $this->source = $source;
 
-		$this->source = $source;
-
-		$this->message = $message;
-
-	}
-
-
-
-	/**
-
-	 * Get source of the error.
-
-	 * @return mixed source of the error
-
-	 */
-
-	public function getSource() {
-
-		return $this->source;
-
-	}
+        $this->message = $message;
+    }
 
 
 
-	/**
+    /**
 
-	 * Get error message.
+     * Get source of the error.
 
-	 * @return string error message
+     * @return mixed source of the error
 
-	 */
+     */
 
-	public function getMessage() {
-
-		return $this->message;
-
-	}
-
+    public function getSource()
+    {
+        return $this->source;
+    }
 
 
+
+    /**
+
+     * Get error message.
+
+     * @return string error message
+
+     */
+
+    public function getMessage()
+    {
+        return $this->message;
+    }
 }
-
-?>

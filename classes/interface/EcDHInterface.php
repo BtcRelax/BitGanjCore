@@ -21,8 +21,8 @@ This program is free software: you can redistribute it and/or modify
  *
  * @author Matej Danter
  */
-interface EcDHInterface {
-    
+interface EcDHInterface
+{
     public function __construct(Point $g);
 
     public function calculateKey();
@@ -38,6 +38,4 @@ interface EcDHInterface {
     public function encryptFile($path);
 
     public function decryptFile($path);
-
 }
-?>

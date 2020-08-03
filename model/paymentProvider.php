@@ -10,8 +10,8 @@ use Exception;
  *
  * @author Chronos
  */
-abstract class PaymentProvider {
-
+abstract class PaymentProvider
+{
     protected $_currencyCode; //Currency
     protected $_currencyTitle;
     protected $_logoUrl;
@@ -29,63 +29,78 @@ abstract class PaymentProvider {
     protected $_createDate;
     private $Last_error = '';
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->Last_error = "Продавец, не поддерживает прём оплаты в данной валюте!";
     }
 
-    public function getInvoiceAddress() {
+    public function getInvoiceAddress()
+    {
         return $this->_invoiceAddress;
     }
 
-    public function setInvoiceAddress($invoiceAddress) {
+    public function setInvoiceAddress($invoiceAddress)
+    {
         $this->_invoiceAddress = $invoiceAddress;
     }
 
-    public function getInitialBallance() {
+    public function getInitialBallance()
+    {
         return $this->_initialBallance;
     }
 
-    public function setInitialBallance($initialBallance) {
+    public function setInitialBallance($initialBallance)
+    {
         $this->_initialBallance = $initialBallance;
     }
 
-    public function getInvoiceBalance() {
+    public function getInvoiceBalance()
+    {
         return $this->_invoiceBalance;
     }
 
-    public function getBalanceDate() {
+    public function getBalanceDate()
+    {
         return $this->_balanceDate;
     }
 
-    public function setInvoiceBalance($invoiceBalance) {
+    public function setInvoiceBalance($invoiceBalance)
+    {
         $this->_invoiceBalance = $invoiceBalance;
     }
 
-    public function setBalanceDate($balanceDate) {
+    public function setBalanceDate($balanceDate)
+    {
         $this->_balanceDate = $balanceDate;
     }
 
-    public function getLogoUrl() {
+    public function getLogoUrl()
+    {
         return $this->_logoUrl;
     }
 
-    public function getLastError() {
+    public function getLastError()
+    {
         return $this->Last_error;
     }
 
-    protected function setLastError($Last_error = null) {
+    protected function setLastError($Last_error = null)
+    {
         $this->Last_error = $Last_error;
     }
 
-    public function isInited() {
+    public function isInited()
+    {
         return $this->_isInited;
     }
 
-    public function getCurrencyCode() {
+    public function getCurrencyCode()
+    {
         return $this->_currencyCode;
     }
 
-    public function setIsInited($pSaller, $isInited) {
+    public function setIsInited($pSaller, $isInited)
+    {
         try {
             $this->_sallerId = $isInited === true ? $pSaller->getIdCustomer() : null;
             $this->_isInited = $isInited;
@@ -94,42 +109,47 @@ abstract class PaymentProvider {
         }
     }
 
-    public function getCurrencyTitle() {
+    public function getCurrencyTitle()
+    {
         return $this->_currencyTitle;
     }
 
-    public function setCurrencyCode($_currencyCode) {
+    public function setCurrencyCode($_currencyCode)
+    {
         $this->_currencyCode = $_currencyCode;
     }
 
-    public function setCurrencyTitle($_currencyTitle) {
+    public function setCurrencyTitle($_currencyTitle)
+    {
         $this->_currencyTitle = $_currencyTitle;
     }
 
-    public function setLogoUrl($_logoUrl) {
+    public function setLogoUrl($_logoUrl)
+    {
         $this->_logoUrl = $_logoUrl;
     }
 
-    public function doInvoiceSavedEvent($pDB = null){
+    public function doInvoiceSavedEvent($pDB = null)
+    {
         return true;
     }
       
-    // 
-    abstract function initBySallerProperties($pSaller);
+    //
+    abstract public function initBySallerProperties($pSaller);
 
-    abstract function getProviderCode();
+    abstract public function getProviderCode();
 
-    abstract function formatPrice(float $pPrice): float;
+    abstract public function formatPrice(float $pPrice): float;
 
     // Createing exclusive payment target
-    // Result: false, true. 
+    // Result: false, true.
     // If true - than new wallet set in vars.
     // Else, last error will filled
-    abstract function createNewWallet(array $pAdditionalParams = null);
+    abstract public function createNewWallet(array $pAdditionalParams = null);
 
-    // Checking payment target. 
+    // Checking payment target.
     // Result: false, true.
     // If true - than old balance and new ballance set to vars.
     // Else, fill last error
-    abstract function getBallanceByWallet();
+    abstract public function getBallanceByWallet();
 }

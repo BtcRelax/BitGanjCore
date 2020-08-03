@@ -3,16 +3,18 @@ namespace BtcRelax;
 
 use BtcRelax\Model\Identicator;
 
-abstract class API {
-
-    public static function response($data, int $status = 200) {
+abstract class API
+{
+    public static function response($data, int $status = 200)
+    {
         \BtcRelax\API::setHeaders($status);
         $answer = \json_encode($data, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE);
         \BtcRelax\Log::general($answer, \BtcRelax\Log::INFO);
         echo $answer;
     }
 
-    public static function getStatusMessage(int $code = 200) {
+    public static function getStatusMessage(int $code = 200)
+    {
         $status = array(
             100 => 'Continue',101 => 'Switching Protocols',
             200 => 'OK',201 => 'Created',202 => 'Accepted',203 => 'Non-Authoritative Information', 204 => 'No Content',205 => 'Reset Content',206 => 'Partial Content',
@@ -27,19 +29,22 @@ abstract class API {
         return ($status[$code]) ? $status[$code] : $status[500];
     }
 
-    public static function setHeaders(int $code = 200) {
+    public static function setHeaders(int $code = 200)
+    {
         header("HTTP/1.1 " . $code . " " . \BtcRelax\API::getStatusMessage($code));
         header("Content-Type:application/json");
     }
 
     abstract public function processApi();
 
-    protected function process() {
-        global $core; $vRequest = $core->getRequest();
+    protected function process()
+    {
+        global $core;
+        $vRequest = $core->getRequest();
         $reqFunc = $vRequest->getParamByKey('action');
         if ((int) \method_exists($this, $reqFunc) > 0) {
             try {
-                \BtcRelax\Log::general(\sprintf('API was called method: %s',  $reqFunc), \BtcRelax\Log::INFO);
+                \BtcRelax\Log::general(\sprintf('API was called method: %s', $reqFunc), \BtcRelax\Log::INFO);
                 $this->$reqFunc();
             } catch (\Error $exc) {
                 \BtcRelax\Log::general($exc, \BtcRelax\Log::FATAL);
@@ -50,7 +55,7 @@ abstract class API {
         }
     }
 
-//        if ($vSessionState !== \BtcRelax\SecureSession::STATUS_NOT_INIT) {         
+//        if ($vSessionState !== \BtcRelax\SecureSession::STATUS_NOT_INIT) {
 //           $vCore = \BtcRelax\Core::getIstance();
 //           $param["SessionLifeTime"] = $vSession->getSessionLifetime();
 //           if ($vSessionState === \BtcRelax\SecureSession::STATUS_AUTH_PROCESS)
@@ -60,7 +65,7 @@ abstract class API {
 //               $vResult = $vAuthenticator->getAuthParams();
 //               $vResult += ["authType"=>$vAuthenticator->getIdentTypeCode() ];
 //               $param["StartAuthResponce"] = $vResult;
-//           }           
+//           }
 //           if (($vSessionState === \BtcRelax\SecureSession::STATUS_USER) || ($vSessionState === \BtcRelax\SecureSession::STATUS_ROOT)
 //                || ($vSessionState === \BtcRelax\SecureSession::STATUS_BANNED) ) {
 //                $vAM = \BtcRelax\Core::createAM();
@@ -71,15 +76,15 @@ abstract class API {
 //                $param["UserInfo"] = ["userId" => $vUser->getIdCustomer() ,
 //                    "info" => $vAM->getUserInfoById() ,
 //                    "lhcParams" => \BtcRelax\LHCApi::prepareUserInfo($vUser),
-//                    "userRights" => $vAM->renderGetUserRights(), 
-//                    "userProperties" => $vAM->renderGetUserProperties(), 
-//                    "userIdentifiers" => $vAM->renderGetIdentifiers() , 
-//                    "isBaned" => $vUser->getIsBaned() , 
-//                    "hasActiveOrder" => \FALSE !== $vCurrentOrder ]; 
-//            }          
+//                    "userRights" => $vAM->renderGetUserRights(),
+//                    "userProperties" => $vAM->renderGetUserProperties(),
+//                    "userIdentifiers" => $vAM->renderGetIdentifiers() ,
+//                    "isBaned" => $vUser->getIsBaned() ,
+//                    "hasActiveOrder" => \FALSE !== $vCurrentOrder ];
+//            }
 //        }
 //    }
-//    
+//
     /*
      *  Get info about current user
      */
@@ -93,14 +98,14 @@ abstract class API {
 //            //$vLHC = new \BtcRelax\LHCApi(LHC_URL,LHC_USER,LHC_API_KEY);
 //            $vCurrentOrder = $vOM->getActualOrder();
 //            $vUser = $vAM->getUser();
-//            $param["UserInfo"] = ["userId" => $vUser->getIdCustomer(), 
+//            $param["UserInfo"] = ["userId" => $vUser->getIdCustomer(),
 //                "info" => $vAM->getUserInfoById() ,
 //                "lhcParams" => \BtcRelax\LHCApi::prepareUserInfo($vUser),
-//                "userRights" => $vAM->renderGetUserRights(), 
-//                "userProperties" => $vAM->renderGetUserProperties(), 
-//                "userIdentifiers" => $vAM->renderGetIdentifiers(), 
-//                "isBaned" => $vUser->getIsBaned() ,   
-//                "hasActiveOrder" => \FALSE !== $vCurrentOrder ]; 
+//                "userRights" => $vAM->renderGetUserRights(),
+//                "userProperties" => $vAM->renderGetUserProperties(),
+//                "userIdentifiers" => $vAM->renderGetIdentifiers(),
+//                "isBaned" => $vUser->getIsBaned() ,
+//                "hasActiveOrder" => \FALSE !== $vCurrentOrder ];
 //        } else {$param["UserInfo"] = ["error" => "Session state is not a logged in user!"]; }
 //        $this->response($param, 200);
 //    }
@@ -109,34 +114,38 @@ abstract class API {
 //        $param = [];
 //        $this->_core->initSession();
 //        $vSessionState = $this->_core->getSessionState();
-//        if (($vSessionState === \BtcRelax\SecureSession::STATUS_USER) || 
-//                ($vSessionState === \BtcRelax\SecureSession::STATUS_ROOT) || 
+//        if (($vSessionState === \BtcRelax\SecureSession::STATUS_USER) ||
+//                ($vSessionState === \BtcRelax\SecureSession::STATUS_ROOT) ||
 //                ($vSessionState === \BtcRelax\SecureSession::STATUS_BANNED) ) {
 //            $vAM = \BtcRelax\Core::createAM();
 //            $vCurrentUser = $vAM->getUser();
 //            $vLHC = new \BtcRelax\LHCApi(LHC_URL,LHC_USER,LHC_API_KEY);
 //            $param += $vLHC->prepareUserInfo($vCurrentUser) ;
-//            $this->response($param, 200);            
-//        } 
-//        else { $this->response("You not logged in", 401  ); }        
+//            $this->response($param, 200);
+//        }
+//        else { $this->response("You not logged in", 401  ); }
 //    }
     
     /*
      * Get sessions if user has rights
      */
-    public function getSessions() {
+    public function getSessions()
+    {
         $param = [];
         $this->_core->initSession();
         $vSessionState = $this->_core->getSessionState();
         if ($vSessionState === \BtcRelax\SecureSession::STATUS_USER || $vSessionState === \BtcRelax\SecureSession::STATUS_ROOT) {
             $vAM = \BtcRelax\Core::createAM();
-            if ($vAM->isUserHasRight("SESSIONS"))
-            {
+            if ($vAM->isUserHasRight("SESSIONS")) {
                 $vSession = $this->_core->getCurrentSession();
                 $param = ["rows" => $vSession->getSessionsInfo()];
-                $this->response($param, 200);            
-            } else { $this->response("You not have rights", 401  );  }
-        } else { $this->response("You not logged in", 401  ); }
+                $this->response($param, 200);
+            } else {
+                $this->response("You not have rights", 401);
+            }
+        } else {
+            $this->response("You not logged in", 401);
+        }
     }
 
     /*
@@ -144,18 +153,21 @@ abstract class API {
     */
     public function getInvoices()
     {
-       $param = [];
+        $param = [];
         $this->_core->initSession();
         $vSessionState = $this->_core->getSessionState();
         if ($vSessionState === \BtcRelax\SecureSession::STATUS_USER || $vSessionState === \BtcRelax\SecureSession::STATUS_ROOT) {
             $vAM = \BtcRelax\Core::createAM();
             $vInvoicesList = $vAM->getUserInvoices();
             $param = ["rows" => $vInvoicesList ];
-            $this->response($param, 200);            
-        } else { $this->response("You not logged in", 401  ); }		
+            $this->response($param, 200);
+        } else {
+            $this->response("You not logged in", 401);
+        }
     }
     
-    public function Session() {
+    public function Session()
+    {
         $vParams = $this->_core->getRequest();
         if (array_key_exists('action', $vParams)) {
             $vAction = \strtolower($vParams['action']);
@@ -165,54 +177,60 @@ abstract class API {
                 case 'startauth':
                     $sess = $this->_core->getCurrentSession();
                     $param["isSessionStarted"] = $sess->startSession();
-                    $this->response($param,200);
+                    $this->response($param, 200);
                     break;
                 default:
                     $this->response("Not Acceptable call!", 406);
                     break;
                 }
-            } else 
-                { 
-                    \BtcRelax\Log::general("Cannot determine action!", \BtcRelax\Log::ERROR); 
-                    $this->response("Not Acceptable call!", 406);
-                }           
+        } else {
+            \BtcRelax\Log::general("Cannot determine action!", \BtcRelax\Log::ERROR);
+            $this->response("Not Acceptable call!", 406);
+        }
     }
-	
-    public function User() {
+    
+    public function User()
+    {
         $vParams = $this->_core->getRequest();
-        if (array_key_exists('action', $vParams)){
+        if (array_key_exists('action', $vParams)) {
             $vAction = \strtolower($vParams['action']);
             switch ($vAction) {
                 // Require 1 parameters
                 // id - CustomerId;
                 case 'getinfo':
-                    if (\array_key_exists("id", $vParams))
-                    {
+                    if (\array_key_exists("id", $vParams)) {
                         $vAM = \BtcRelax\Core::createAM();
-                        $result = $vAM->getUserInfoById($vParams);                        
+                        $result = $vAM->getUserInfoById($vParams);
                         if (\FALSE !== $result) {
-                                    $vUser = \BtcRelax\AM::userById($vParams['id']);
-                                    $vIdentifiers = $vAM->renderGetIdentifiers($vUser);
-                                    $result +=  ["userIdentifiers" => $vIdentifiers] ;
-                                    $this->response($result, 200);
-                        } else { $this->response("User not found", 404); }
-                    } else { $this->response("Argument id not found", 405); }
+                            $vUser = \BtcRelax\AM::userById($vParams['id']);
+                            $vIdentifiers = $vAM->renderGetIdentifiers($vUser);
+                            $result +=  ["userIdentifiers" => $vIdentifiers] ;
+                            $this->response($result, 200);
+                        } else {
+                            $this->response("User not found", 404);
+                        }
+                    } else {
+                        $this->response("Argument id not found", 405);
+                    }
                     break;
                 case 'setbanned':
-                    if (\array_key_exists("id", $vParams))
-                    {
+                    if (\array_key_exists("id", $vParams)) {
                         try {
                             $vUser = \BtcRelax\AM::userById($vParams['id']);
                             if (\array_key_exists("banned", $vParams)) {
                                 $newState = $vParams['banned'];
-                            } else { $newState = !$vUser->getIsBaned(); }
+                            } else {
+                                $newState = !$vUser->getIsBaned();
+                            }
                             $vUser->setIsBaned($newState);
                             $result = \BtcRelax\AM::saveUser($vUser);
                             $this->response($result->getArray(), 200);
                         } catch (\LogicException $exc) {
                             $this->response($exc->getMessage(), 404);
                         }
-                    } else { $this->response("Argument id not found", 405); }
+                    } else {
+                        $this->response("Argument id not found", 405);
+                    }
                     break;
                 default:
                     $this->response("Not Acceptable call!", 406);
@@ -221,7 +239,7 @@ abstract class API {
         } else {
             \BtcRelax\Log::general("Cannot determine action!", \BtcRelax\Log::ERROR);
             $this->response("Not Acceptable call!", 406);
-        }        
+        }
     }
     
     
@@ -230,27 +248,30 @@ abstract class API {
     public function Statistics()
     {
         $vParams = $this->_core->getRequest();
-        if (array_key_exists('action', $vParams)){
+        if (array_key_exists('action', $vParams)) {
             $vAction = \strtolower($vParams['action']);
             switch ($vAction) {
                 // Require 1 parameters
                 // id - CustomerId;
                 // includeIdentifiers - add identifiers array to output
                 case 'getuser':
-                    if (\array_key_exists("id", $vParams))
-                    {
+                    if (\array_key_exists("id", $vParams)) {
                         $vAM = \BtcRelax\Core::createAM();
-                        $result = $vAM->getUserInfoById($vParams);                        
+                        $result = $vAM->getUserInfoById($vParams);
                         if (\FALSE !== $result) {
                             if ((\array_key_exists("includeIdentifiers", $vParams)) && ($vParams['includeIdentifiers'] == true)) {
-                                    $vUser = \BtcRelax\AM::userById($vParams['id']);
-                                    $vIdentifiers = $vAM->renderGetIdentifiers($vUser);
-                                    $result +=  ["userIdentifiers" => $vIdentifiers] ;
+                                $vUser = \BtcRelax\AM::userById($vParams['id']);
+                                $vIdentifiers = $vAM->renderGetIdentifiers($vUser);
+                                $result +=  ["userIdentifiers" => $vIdentifiers] ;
                             }
-                        } else { $this->response("User not found", 404); }
-                    } else { $this->response("Argument id not found", 405); }
-                    break;                
-                // Require 1 parameter 
+                        } else {
+                            $this->response("User not found", 404);
+                        }
+                    } else {
+                        $this->response("Argument id not found", 405);
+                    }
+                    break;
+                // Require 1 parameter
                 // id - OrderId
                 case 'getorder':
                     $vOM = \BtcRelax\Core::createOM();
@@ -260,7 +281,7 @@ abstract class API {
                     $vOM = \BtcRelax\Core::createOM();
                     $result = $vOM->getMaxOrderId();
                     break;
-                // Require 1 parameter 
+                // Require 1 parameter
                 // id - InvoiceId
                 // isNeedCheckBalance - are system will check balance for current invoice
                 case 'getinvoice':
@@ -280,10 +301,11 @@ abstract class API {
     
     /*
      * External methods:
-     * Register user if any identificator already authenticated. 
+     * Register user if any identificator already authenticated.
      * Loop all idenficetors throught object user.
      */
-    public function registerUser() {
+    public function registerUser()
+    {
         $this->_core->initSession();
         $vAM = \BtcRelax\Core::createAM();
         $result = $vAM->createNewUser();
@@ -298,17 +320,19 @@ abstract class API {
      * External methods:
      * checkNonce from arguments
      */
-    public function checkNonce() {
+    public function checkNonce()
+    {
         $this->_core->initSession();
         $vAM = \BtcRelax\Core::createAM();
         $result["checkNonceResult"] = $vAM->checkAuth();
         $this->response($result, 200);
     }
 
-    /* Wait for input argument from Post/Get 
-    * mailCode - where code that was sent to mail 
+    /* Wait for input argument from Post/Get
+    * mailCode - where code that was sent to mail
     */
-    public function checkMailCode() {
+    public function checkMailCode()
+    {
         $this->_core->initSession();
         $vParams = $this->_core->getRequest();
         if (array_key_exists('mailCode', $vParams)) {
@@ -326,17 +350,18 @@ abstract class API {
         }
     }
 
-    /* Wait for input argument from Post/Get 
+    /* Wait for input argument from Post/Get
     * mail - where mail for send code
-    */ 
-    public function sendMailId() {
+    */
+    public function sendMailId()
+    {
         $this->_core->initSession();
         $vParams = $this->_core->getRequest();
-        if (array_key_exists('mail',$vParams)) {
+        if (array_key_exists('mail', $vParams)) {
             $vAM = \BtcRelax\Core::createAM();
             $vResult = $vAM->beginAuthenticate(Identicator::ID_TYPE_MAIL, $vParams);
             $result["sendMailIdResponce"] = $vResult;
-            if (FALSE === $vResult) {
+            if (false === $vResult) {
                 $result["Error"] = $vAM->getLastError();
             }
             $this->response($result, 200);
@@ -345,16 +370,16 @@ abstract class API {
         }
     }
 
-    public function startAuth() {
+    public function startAuth()
+    {
         $this->_core->initSession();
         $vParams = $this->_core->getRequest();
         if (array_key_exists('authType', $vParams)) {
             $result = array();
             $vAuthType = $vParams['authType'];
             $vAM = Core::createAM();
-            $vResult = $vAM->beginAuthenticate($vAuthType,$vParams);
-            if (FALSE !== $vResult)
-            {
+            $vResult = $vAM->beginAuthenticate($vAuthType, $vParams);
+            if (false !== $vResult) {
                 $vResult += ["authType"=>$vAuthType];
                 $vSessionState = \BtcRelax\SecureSession::getSessionState();
                 $result["SessionState"] = $vSessionState;
@@ -367,12 +392,14 @@ abstract class API {
         }
     }
 
-    public function stopAuth() {
+    public function stopAuth()
+    {
         //Todo
         $this->response('Session killed', 200);
     }
 
-    public function getActiveOrder() {
+    public function getActiveOrder()
+    {
         $result["OrderResult"] = false;
         $this->_core->initSession();
         $vSessionState = $this->_core->getSessionState();
@@ -385,34 +412,46 @@ abstract class API {
             }
         }
         $this->response($result, 200);
-    }     
-
-    public function Order() {
-        try { $this->_core->initSession(); $result["OrderResult"] = false;
-            $vOM = Core::createOM(); $vParams = $this->_core->getRequest();
-            $vOrder = $vOM->getActualOrder();
-            if (\FALSE === $vOrder) { $vOrder = $vOM->createNewOrder();  }
-            $result["OrderResult"] = $vOM->setOrder($vParams);
-            if (FALSE !== $result["OrderResult"]) {  $result["OrderInfo"] = $vOM->renderActiveOrder(); }
-            else { $result["Error"] = $vOM->getLastError(); }
-            $this->response($result, 200); }
-        catch (\BtcRelax\Exception\AuthentificationCritical $vError )
-        { $this->response($vError->getMessage(),401 ); }
     }
 
-    public function Product()  {
-        $vPM = Core::createPM(); $vCurrentProduct = null;
+    public function Order()
+    {
+        try {
+            $this->_core->initSession();
+            $result["OrderResult"] = false;
+            $vOM = Core::createOM();
+            $vParams = $this->_core->getRequest();
+            $vOrder = $vOM->getActualOrder();
+            if (\FALSE === $vOrder) {
+                $vOrder = $vOM->createNewOrder();
+            }
+            $result["OrderResult"] = $vOM->setOrder($vParams);
+            if (false !== $result["OrderResult"]) {
+                $result["OrderInfo"] = $vOM->renderActiveOrder();
+            } else {
+                $result["Error"] = $vOM->getLastError();
+            }
+            $this->response($result, 200);
+        } catch (\BtcRelax\Exception\AuthentificationCritical $vError) {
+            $this->response($vError->getMessage(), 401);
+        }
+    }
+
+    public function Product()
+    {
+        $vPM = Core::createPM();
+        $vCurrentProduct = null;
         $vParams = $this->_core->getRequest();
-        if (array_key_exists('action', $vParams)){
+        if (array_key_exists('action', $vParams)) {
             $vAction = \strtolower($vParams['action']);
             switch ($vAction) {
                 case'create':
-                    $vCreateParams = \json_decode($vParams['params'],true);
+                    $vCreateParams = \json_decode($vParams['params'], true);
                     $vNewProduct = \BtcRelax\Model\Product::WithParams($vCreateParams);
                     $vCurrentProduct = $vPM->setProduct($vNewProduct);
                     break;
                 case'get':
-                    $vGetParams = \json_decode($vParams['params'],true);
+                    $vGetParams = \json_decode($vParams['params'], true);
                     $vParamsArray = \array_pop($vGetParams);
                     $vProductId = (int)$vParamsArray['ProductId'];
                     $vCurrentProduct = $vPM->getProduct($vProductId);
@@ -424,113 +463,131 @@ abstract class API {
                     break;
             }
             $result["ProductResult"] = !is_null($vCurrentProduct);
-            if (FALSE !==$result["ProductResult"]) { $result["ProductState"] = $vPM->renderProduct($vCurrentProduct); } else { $result["Error"] = $vPM->getLastError(); }
+            if (false !==$result["ProductResult"]) {
+                $result["ProductState"] = $vPM->renderProduct($vCurrentProduct);
+            } else {
+                $result["Error"] = $vPM->getLastError();
+            }
             $this->response($result, 200);
         } else {
-            \BtcRelax\Log::general("Cannot determine action!", \BtcRelax\Log::ERROR);  
-            $this->response('Not Acceptable call!', 406); }
+            \BtcRelax\Log::general("Cannot determine action!", \BtcRelax\Log::ERROR);
+            $this->response('Not Acceptable call!', 406);
+        }
     }
     
-    public function Region()  {
+    public function Region()
+    {
         $vPM = Core::createPM();
     }
     
-    public function Bookmark() {
+    public function Bookmark()
+    {
         $vPM = Core::createPM();
         $vParams = $this->_core->getRequest();
-        if (array_key_exists('action', $vParams))
-        /* @var $vAction type */ 
+        if (array_key_exists('action', $vParams)) /* @var $vAction type */
         {   $vAction = $vParams['action'];
             $result["BookmarkResult"] = false;
             switch ($vAction) {
             case'CancelFromOrder':
-                if (\array_key_exists('bookmarkId', $vParams) && \array_key_exists('author', $vParams) ) {
+                if (\array_key_exists('bookmarkId', $vParams) && \array_key_exists('author', $vParams)) {
                     $vAM = \BtcRelax\Core::createAM();
                     $vUser = $vAM->getUserById($vParams['author']);
                     $vPointId = (int) $vParams['bookmarkId'];
                     $vBookmark = \BtcRelax\PM::bookmarkById($vPointId);
                     if ($vBookmark instanceof \BtcRelax\Model\Bookmark) {
-                        
                         $result["BookmarkResult"] = true;
                         $result["BookmarkState"] = $vBookmark->getStateInfo();
                     } else {
-                        $result["BookmarkError"] = $vPM->getLastError(); 
-                    }                    
-                }else { $this->response("Method SetNewState precondition failed", 412); }                
-                break;                
+                        $result["BookmarkError"] = $vPM->getLastError();
+                    }
+                } else {
+                    $this->response("Method SetNewState precondition failed", 412);
+                }
+                break;
             case'SetNewState':
                 if (\array_key_exists('bookmarkId', $vParams) && \array_key_exists('author', $vParams) && \array_key_exists('state', $vParams)) {
                     $vAM = \BtcRelax\Core::createAM();
                     $vUser = $vAM->getUserById($vParams['author']);
                     $vPointId = (int) $vParams['bookmarkId'];
                     $vNewState = \BtcRelax\Validation\BookmarkValidator::validateStatus($vParams['state']);
-                    $vBookmark = $vPM->setNewState($vUser, $vPointId , $vNewState);
+                    $vBookmark = $vPM->setNewState($vUser, $vPointId, $vNewState);
                     if ($vBookmark instanceof \BtcRelax\Model\Bookmark) {
                         $result["BookmarkResult"] = true;
                         $result["BookmarkState"] = $vBookmark->getStateInfo();
                     } else {
-                        $result["BookmarkError"] = $vPM->getLastError(); 
-                    }                    
-                }else { $this->response("Method SetNewState precondition failed", 412); }
+                        $result["BookmarkError"] = $vPM->getLastError();
+                    }
+                } else {
+                    $this->response("Method SetNewState precondition failed", 412);
+                }
                 break;
             case'UpdatePoint':
                 if (\array_key_exists('bookmarkId', $vParams) && \array_key_exists('author', $vParams) && \array_key_exists('params', $vParams)) {
                     $vAM = \BtcRelax\Core::createAM();
                     $vUser = $vAM->getUserById($vParams['author']);
-                    $vPointUpdateParams = \json_decode($vParams['params'],true);
+                    $vPointUpdateParams = \json_decode($vParams['params'], true);
                     $vPointId = (int) $vParams['bookmarkId'];
-                    $vBookmark = $vPM->updatePointById($vUser, $vPointId , \array_pop($vPointUpdateParams));
+                    $vBookmark = $vPM->updatePointById($vUser, $vPointId, \array_pop($vPointUpdateParams));
                     if ($vBookmark instanceof \BtcRelax\Model\Bookmark) {
                         $result["BookmarkResult"] = true;
-                        $result["BookmarkState"] = ["bookmarkId" => $vBookmark->getIdBookmark(), 
+                        $result["BookmarkState"] = ["bookmarkId" => $vBookmark->getIdBookmark(),
                             "bookmarkState" => $vBookmark->getState() , "bookmarkPhotoLink" => $vBookmark->getLink(),
                             "bookmarkLatitude" => $vBookmark->getLatitude(), "bookmarkLongitude" => $vBookmark->getLongitude(),
                             "bookmarkDescription" => $vBookmark->getDescription() ];
                     } else {
-                        $result["BookmarkError"] = $vPM->getLastError(); 
-                    }                    
-                }else { $this->response("Method UpdatePoint precondition failed", 412); }
+                        $result["BookmarkError"] = $vPM->getLastError();
+                    }
+                } else {
+                    $this->response("Method UpdatePoint precondition failed", 412);
+                }
                 break;
             case'GetPointState':
                 if (array_key_exists('bookmarkId', $vParams) && array_key_exists('author', $vParams)) {
-                    $vBookmark = $vPM->getBookmarkById($vParams['bookmarkId']);  
-                    if ($vBookmark instanceof \BtcRelax\Model\Bookmark) 
-                    {
+                    $vBookmark = $vPM->getBookmarkById($vParams['bookmarkId']);
+                    if ($vBookmark instanceof \BtcRelax\Model\Bookmark) {
                         if ($vBookmark->getIdDroper() === $vParams['author']) {
                             $result["BookmarkResult"] = true;
                             $result["BookmarkState"] = $vBookmark->getStateInfo();
-                        } else { $this->response("You are not owner", 401); }
-                    } else { $result["BookmarkError"] = $vPM->getLastError(); } } 
-                else { $this->response("Method GetPointState precondition failed", 412); }
+                        } else {
+                            $this->response("You are not owner", 401);
+                        }
+                    } else {
+                        $result["BookmarkError"] = $vPM->getLastError();
+                    }
+                } else {
+                    $this->response("Method GetPointState precondition failed", 412);
+                }
                 break;
             case'CreateNewPoint':
                 if (\array_key_exists('author', $vParams) && array_key_exists('params', $vParams)) {
                     $vAM = \BtcRelax\Core::createAM();
                     $vUser = $vAM->getUserById($vParams['author']);
-                    if (FALSE != $vUser) {
-                            $vPointParams = \json_decode($vParams['params'],true);
-                            $vBookmark = $vPM->createNewPoint($vUser, \array_pop($vPointParams));
-                            if ($vBookmark instanceof \BtcRelax\Model\Bookmark) {
-                                $result["BookmarkResult"] = true;
-                                $result["BookmarkState"] = $vBookmark->getStateInfo();
-                            } else {
-                                $result["BookmarkResult"] = false;  
-                                $result["BookmarkError"] = $vPM->getLastError(); 
-                            } 
+                    if (false != $vUser) {
+                        $vPointParams = \json_decode($vParams['params'], true);
+                        $vBookmark = $vPM->createNewPoint($vUser, \array_pop($vPointParams));
+                        if ($vBookmark instanceof \BtcRelax\Model\Bookmark) {
+                            $result["BookmarkResult"] = true;
+                            $result["BookmarkState"] = $vBookmark->getStateInfo();
                         } else {
-                            $result["BookmarkResult"] = false;  
-                            $result["BookmarkError"] = $vAM->getLastError(); 
+                            $result["BookmarkResult"] = false;
+                            $result["BookmarkError"] = $vPM->getLastError();
+                        }
+                    } else {
+                        $result["BookmarkResult"] = false;
+                        $result["BookmarkError"] = $vAM->getLastError();
                     }
-                } else { $this->response("Method CreateNewPoint precondition failed", 412); }
+                } else {
+                    $this->response("Method CreateNewPoint precondition failed", 412);
+                }
                 break;
             default:
-                \BtcRelax\Log::general(\sprintf("Unknown action:%s.",$vAction ), \BtcRelax\Log::ERROR);  
+                \BtcRelax\Log::general(\sprintf("Unknown action:%s.", $vAction), \BtcRelax\Log::ERROR);
                 break;
             }
-            $this->response ($result, 200);
+            $this->response($result, 200);
         } else {
-            \BtcRelax\Log::general("Cannot determine action!", \BtcRelax\Log::ERROR);  
-           $this->response('Not Acceptable call!', 406); 
+            \BtcRelax\Log::general("Cannot determine action!", \BtcRelax\Log::ERROR);
+            $this->response('Not Acceptable call!', 406);
         }
     }
 }

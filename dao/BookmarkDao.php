@@ -7,9 +7,10 @@ use BtcRelax\Log;
 use BtcRelax\Mapping\BookmarkMapper;
 use BtcRelax\Model\Bookmark;
 
-final class BookmarkDao extends BaseDao {
-
-    public function insert(Bookmark $newBookmark) {
+final class BookmarkDao extends BaseDao
+{
+    public function insert(Bookmark $newBookmark)
+    {
         $result = false;
         $newBookmark->setCreateDate(new \DateTime());
         $sql = "INSERT INTO `Bookmarks` (`idBookmark`,`CreateDate`, `AdvertiseTitle`,`RegionTitle`,`CustomPrice`,`PriceCurrency`,"
@@ -18,37 +19,42 @@ final class BookmarkDao extends BaseDao {
                 . ":IdDroper, :Latitude, :Longitude, :Link, :Description)";
         $rawParams = $this->getParams($newBookmark);
         $statement = $this->getDb()->prepare($sql);
-        $statement->bindParam(':idBookmark',$rawParams[':idBookmark']);
-	$statement->bindParam(':CreateDate',$rawParams[':CreateDate']);
-        $statement->bindParam(':AdvertiseTitle',$rawParams[':AdvertiseTitle']);
-        $statement->bindParam(':RegionTitle',$rawParams[':RegionTitle']);
-        $statement->bindParam(':CustomPrice',$rawParams[':CustomPrice']);
-        $statement->bindParam(':PriceCurrency',$rawParams[':PriceCurrency']);
-        $statement->bindParam(':IdDroper',$rawParams[':IdDroper']);
-        $statement->bindParam(':Latitude',$rawParams[':Latitude']);
-        $statement->bindParam(':Longitude',$rawParams[':Longitude']);
-        $statement->bindParam(':Link',$rawParams[':Link']);
-        $statement->bindParam(':Description',$rawParams[':Description']);
+        $statement->bindParam(':idBookmark', $rawParams[':idBookmark']);
+        $statement->bindParam(':CreateDate', $rawParams[':CreateDate']);
+        $statement->bindParam(':AdvertiseTitle', $rawParams[':AdvertiseTitle']);
+        $statement->bindParam(':RegionTitle', $rawParams[':RegionTitle']);
+        $statement->bindParam(':CustomPrice', $rawParams[':CustomPrice']);
+        $statement->bindParam(':PriceCurrency', $rawParams[':PriceCurrency']);
+        $statement->bindParam(':IdDroper', $rawParams[':IdDroper']);
+        $statement->bindParam(':Latitude', $rawParams[':Latitude']);
+        $statement->bindParam(':Longitude', $rawParams[':Longitude']);
+        $statement->bindParam(':Link', $rawParams[':Link']);
+        $statement->bindParam(':Description', $rawParams[':Description']);
         $statement->execute();
         if (!$statement->rowCount()) {
             $errMsg = $statement->errorInfo();
-            if ($errMsg[1] === 1062) 
-            {
+            if ($errMsg[1] === 1062) {
                 $result = $errMsg[1];
-            } else { throw new \BtcRelax\Exception\AssignBookmarkException(\sprintf('Bookmark registering Error:%s"', $errMsg[2] )); }
+            } else {
+                throw new \BtcRelax\Exception\AssignBookmarkException(\sprintf('Bookmark registering Error:%s"', $errMsg[2]));
+            }
         } else {
-             $newPointId = $this->getDb()->lastInsertId();
-             $result = $this->findById($newPointId);             
+            $newPointId = $this->getDb()->lastInsertId();
+            $result = $this->findById($newPointId);
         }
         return $result;
     }
 
-    public function save(Bookmark $pBookmark) {
-        if (empty($pBookmark->getIdBookmark())) { return $this->insert($pBookmark);}
+    public function save(Bookmark $pBookmark)
+    {
+        if (empty($pBookmark->getIdBookmark())) {
+            return $this->insert($pBookmark);
+        }
         return $this->update($pBookmark);
     }
 
-    public function update(Bookmark $pBookmark) {
+    public function update(Bookmark $pBookmark)
+    {
         $sql = 'UPDATE `Bookmarks` SET                     
                     `State` = :State,
                     `idOrder` = :idOrder,
@@ -69,7 +75,8 @@ final class BookmarkDao extends BaseDao {
      * @return \Model\Bookmark
      * @throws Exception when cannot update or find what to update
      */
-    public function execute($sql, Bookmark $pBookmark) {
+    public function execute($sql, Bookmark $pBookmark)
+    {
         $statement = $this->getDb()->prepare($sql);
         $vParams = $this->getParams($pBookmark);
         $this->executeStatement($statement, $vParams);
@@ -83,7 +90,8 @@ final class BookmarkDao extends BaseDao {
         return $pBookmark;
     }
 
-    public function getParams(\BtcRelax\Model\Bookmark $pBookmark) {
+    public function getParams(\BtcRelax\Model\Bookmark $pBookmark)
+    {
         $params = [
             ':idBookmark' => $pBookmark->getIdBookmark(),
             ':State' => $pBookmark->getState(),
@@ -99,17 +107,21 @@ final class BookmarkDao extends BaseDao {
             ':Description' => $pBookmark->getDescription(),
         ];
         /* @var $vEndDate type */
-        $vCreateDate = $pBookmark->getCreateDate(); $vEndDate = $pBookmark->getEndDate();
-        if (is_null($pBookmark->getIdBookmark()) && !empty($vCreateDate)) { 
+        $vCreateDate = $pBookmark->getCreateDate();
+        $vEndDate = $pBookmark->getEndDate();
+        if (is_null($pBookmark->getIdBookmark()) && !empty($vCreateDate)) {
             $params += [':CreateDate' => self::formatDateTime($vCreateDate)];
-            };
-        if (!is_null($vEndDate)) 
-            { $params += [':EndDate' => self::formatDateTime($vEndDate)];} 
-            else { $params += [':EndDate' => null ]; }; 
+        };
+        if (!is_null($vEndDate)) {
+            $params += [':EndDate' => self::formatDateTime($vEndDate)];
+        } else {
+            $params += [':EndDate' => null ];
+        };
         return $params;
     }
 
-    public function find(BookmarkSearchCriteria $search = null) {
+    public function find(BookmarkSearchCriteria $search = null)
+    {
         $result = [];
         $cnt = 0;
         foreach ($this->query($this->getFindSql($search)) as $row) {
@@ -121,18 +133,17 @@ final class BookmarkDao extends BaseDao {
         return $result;
     }
 
-    private function getFindSql(BookmarkSearchCriteria $search = null) {
+    private function getFindSql(BookmarkSearchCriteria $search = null)
+    {
         $vTable = "Bookmarks";
         $sql = "SELECT `idBookmark`, `CreateDate`, `EndDate`, `State`, `idOrder`, `AdvertiseTitle`, `RegionTitle`, `CustomPrice`, `PriceCurrency`,"
                 . " `IdDroper`, `UnlockDate`, `Latitude`, `Longitude`, `Link`, `Description` FROM  ";
-        if ($search !== null)
-        {
-            if ($search->getIsFrontshop())
-            {
+        if ($search !== null) {
+            if ($search->getIsFrontshop()) {
                 $vTable = "vwBookmarks";
             }
         };
-        $sql = \sprintf("%s `%s`", $sql, $vTable); 
+        $sql = \sprintf("%s `%s`", $sql, $vTable);
         $orderBy = ' CreateDate  ';
         $filter = '';
         if ($search !== null) {
@@ -164,7 +175,8 @@ final class BookmarkDao extends BaseDao {
         return $sql;
     }
 
-    public function findById($id) {
+    public function findById($id)
+    {
         $query = \sprintf("SELECT `idBookmark`, `CreateDate`, `EndDate`, `State`, `idOrder`, `AdvertiseTitle`, `RegionTitle`, `CustomPrice`,"
                 . "`PriceCurrency`, `IdDroper`, `UnlockDate`, `Latitude`, `Longitude`, `Link`, `Description`"
                 . " FROM `Bookmarks` WHERE idBookmark = '%s' LIMIT 1 ", $id);
@@ -179,74 +191,76 @@ final class BookmarkDao extends BaseDao {
         return $bookmark;
     }
     
-    public function unlockBookmark(\BtcRelax\Model\Bookmark $pBookmark) {
+    public function unlockBookmark(\BtcRelax\Model\Bookmark $pBookmark)
+    {
         $vId = $pBookmark->getIdBookmark();
         $vUnlockDate = new \DateTime();
         $pBookmark->setUnlockDate($vUnlockDate);
         $vUnlockDate = $this->formatDateTime($vUnlockDate);
         $pBookmark->setState(\BtcRelax\Model\Bookmark::STATUS_SALED);
-            $sql = 'UPDATE `Bookmarks` SET `State` = :State, `UnlockDate` = :UnlockDate
+        $sql = 'UPDATE `Bookmarks` SET `State` = :State, `UnlockDate` = :UnlockDate
                      WHERE `idBookmark` = :idBookmark AND `IdDroper` = :IdDroper 
                      AND `UnlockDate` IS NULL;';
-                $statement = $this->getDb()->prepare($sql);
-		$rawParams = $this->getParams($pBookmark);
-		$statement->bindParam(':State',$rawParams[':State'], \PDO::PARAM_STR,10);
-		$statement->bindParam(':UnlockDate',$vUnlockDate);
-		$statement->bindParam(':idBookmark',$rawParams[':idBookmark'],\PDO::PARAM_INT);
-		$statement->bindParam(':IdDroper',$rawParams[':IdDroper'],\PDO::PARAM_STR,34);
-                $statement->execute();
+        $statement = $this->getDb()->prepare($sql);
+        $rawParams = $this->getParams($pBookmark);
+        $statement->bindParam(':State', $rawParams[':State'], \PDO::PARAM_STR, 10);
+        $statement->bindParam(':UnlockDate', $vUnlockDate);
+        $statement->bindParam(':idBookmark', $rawParams[':idBookmark'], \PDO::PARAM_INT);
+        $statement->bindParam(':IdDroper', $rawParams[':IdDroper'], \PDO::PARAM_STR, 34);
+        $statement->execute();
         if (!$statement->rowCount()) {
             $errMsg = $statement->errorInfo();
-            throw new \BtcRelax\Exception\AssignBookmarkException(\sprintf('Bookmark:%s cant be unlocked! Error:%s"', $pBookmark->getIdBookmark(), $errMsg[2] ));
+            throw new \BtcRelax\Exception\AssignBookmarkException(\sprintf('Bookmark:%s cant be unlocked! Error:%s"', $pBookmark->getIdBookmark(), $errMsg[2]));
         }
         return $this->findById($vId);
     }
 
     /**
      * @return \Model\Bookmark
-     * Update fields OrderId in State of bookmark, to corresponding order and preordered, 
+     * Update fields OrderId in State of bookmark, to corresponding order and preordered,
      * @throws Exception when cannot update or find what to update
      */
-    public function assignBookmarkToOrder(\BtcRelax\Model\Bookmark $pBookmark, int $idOrder) {
+    public function assignBookmarkToOrder(\BtcRelax\Model\Bookmark $pBookmark, int $idOrder)
+    {
         $vId = $pBookmark->getIdBookmark();
         $pBookmark->setState(\BtcRelax\Model\Bookmark::STATUS_PREORDERED);
-	$pBookmark->setIdOrder($idOrder);
-            $sql = 'UPDATE `Bookmarks` SET 
+        $pBookmark->setIdOrder($idOrder);
+        $sql = 'UPDATE `Bookmarks` SET 
                     `State` = :State,
                     `idOrder` = :idOrder
                      WHERE `idBookmark` = :idBookmark AND `IdDroper` = :IdDroper 
                      AND `idOrder` IS NULL;';
-                $statement = $this->getDb()->prepare($sql);
-		$rawParams = $this->getParams($pBookmark);
-		$statement->bindParam(':State',$rawParams[':State'], \PDO::PARAM_STR,10);
-		$statement->bindParam(':idOrder',$rawParams[':idOrder'],\PDO::PARAM_INT);
-		$statement->bindParam(':idBookmark',$rawParams[':idBookmark'],\PDO::PARAM_INT);
-		$statement->bindParam(':IdDroper',$rawParams[':IdDroper'],\PDO::PARAM_STR,34);
-                $statement->execute();
+        $statement = $this->getDb()->prepare($sql);
+        $rawParams = $this->getParams($pBookmark);
+        $statement->bindParam(':State', $rawParams[':State'], \PDO::PARAM_STR, 10);
+        $statement->bindParam(':idOrder', $rawParams[':idOrder'], \PDO::PARAM_INT);
+        $statement->bindParam(':idBookmark', $rawParams[':idBookmark'], \PDO::PARAM_INT);
+        $statement->bindParam(':IdDroper', $rawParams[':IdDroper'], \PDO::PARAM_STR, 34);
+        $statement->execute();
         if (!$statement->rowCount()) {
             $errMsg = $statement->errorInfo();
-            throw new \BtcRelax\Exception\AssignBookmarkException(\sprintf('Bookmark:%s cant assign to order:%s !Error:%s"', $pBookmark->getIdBookmark(), $pBookmark->getIdOrder(),$errMsg[2] ));
+            throw new \BtcRelax\Exception\AssignBookmarkException(\sprintf('Bookmark:%s cant assign to order:%s !Error:%s"', $pBookmark->getIdBookmark(), $pBookmark->getIdOrder(), $errMsg[2]));
         }
         return $this->findById($vId);
     }
 
-    public function setBookmarkCatched($pBookmark) {
+    public function setBookmarkCatched($pBookmark)
+    {
         $vId = $pBookmark->getIdBookmark();
         $pBookmark->setState(\BtcRelax\Model\Bookmark::STATUS_CATCHED);
-            $sql = 'UPDATE `Bookmarks` SET `State` = :State, `EndDate` = :EndDate
+        $sql = 'UPDATE `Bookmarks` SET `State` = :State, `EndDate` = :EndDate
                      WHERE `idBookmark` = :idBookmark AND `IdDroper` = :IdDroper ;';
-                $statement = $this->getDb()->prepare($sql);
-		$rawParams = $this->getParams($pBookmark);
-		$statement->bindParam(':State',$rawParams[':State'], \PDO::PARAM_STR,10);
-		$statement->bindParam(':EndDate',$rawParams[':EndDate']);
-		$statement->bindParam(':idBookmark',$rawParams[':idBookmark'],\PDO::PARAM_INT);
-		$statement->bindParam(':IdDroper',$rawParams[':IdDroper'],\PDO::PARAM_STR,34);
-                $statement->execute();
+        $statement = $this->getDb()->prepare($sql);
+        $rawParams = $this->getParams($pBookmark);
+        $statement->bindParam(':State', $rawParams[':State'], \PDO::PARAM_STR, 10);
+        $statement->bindParam(':EndDate', $rawParams[':EndDate']);
+        $statement->bindParam(':idBookmark', $rawParams[':idBookmark'], \PDO::PARAM_INT);
+        $statement->bindParam(':IdDroper', $rawParams[':IdDroper'], \PDO::PARAM_STR, 34);
+        $statement->execute();
 //        if (!$statement->rowCount()) {
 //            $errMsg = $statement->errorInfo();
 //            throw new \BtcRelax\Exception\AssignBookmarkException(\sprintf('Bookmark:%s cant be finished! Error:%s"', $pBookmark->getIdBookmark(), $errMsg[2] ));
 //        }
-        return $this->findById($vId);        
+        return $this->findById($vId);
     }
-
 }

@@ -22,7 +22,8 @@ This program is free software: you can redistribute it and/or modify
  *
  * @author Matej Danter
  */
-interface PointInterface {
+interface PointInterface
+{
     public function __construct(CurveFp $curve, $x, $y, $order = null);
 
     public static function cmp($p1, $p2);
@@ -46,6 +47,4 @@ interface PointInterface {
     public function getCurve();
 
     public function getOrder();
-
 }
-?>

@@ -2,50 +2,58 @@
 
 namespace BtcRelax\Dao;
 
-final class OrderSearchCriteria {
-
+final class OrderSearchCriteria
+{
     private $status = null;
     private $customerId = null;
     private $isActive = true;
     private $orderId = null;
 
-    public function __construct($customerId = null, $isActive = true) {
+    public function __construct($customerId = null, $isActive = true)
+    {
         $this->customerId = $customerId;
         $this->isActive = $isActive;
     }
 
-    public function getOrderId() {
+    public function getOrderId()
+    {
         return $this->orderId;
     }
 
-    public function setOrderId($OrderId) {
+    public function setOrderId($OrderId)
+    {
         $this->orderId = $OrderId;
         return $this;
     }
 
-    public function getStatus() {
+    public function getStatus()
+    {
         return $this->status;
     }
 
-    public function getIsActive() {
+    public function getIsActive()
+    {
         return $this->isActive;
     }
 
-    public function setIsActive($isActive) {
+    public function setIsActive($isActive)
+    {
         $this->isActive = $isActive;
     }
 
-    public function getCustomerId() {
+    public function getCustomerId()
+    {
         return $this->customerId;
     }
 
-    public function setCustomerId($customerId) {
+    public function setCustomerId($customerId)
+    {
         $this->customerId = $customerId;
     }
 
-    public function setStatus($status) {
+    public function setStatus($status)
+    {
         $this->status = $status;
         return $this;
     }
-
-} ?>
+}

@@ -13,88 +13,103 @@ namespace BtcRelax\Model;
  *
  * @author god
  */
-class Product {
+class Product
+{
     
-	// private members 
-	private $m_ProductId;
-	private $m_ProductName;
-	private $m_DescriptionUrl;
-        private $m_CreateDate;
+    // private members
+    private $m_ProductId;
+    private $m_ProductName;
+    private $m_DescriptionUrl;
+    private $m_CreateDate;
 
-	/**
-	* Constructor
-	* 
-	* Example: 
-	* $myProduct = new Product();
-	*/
-	public function __construct() {
-		//--
-	}
+    /**
+    * Constructor
+    *
+    * Example:
+    * $myProduct = new Product();
+    */
+    public function __construct()
+    {
+        //--
+    }
 
-	public static function WithParams($vParams) {
-		$instance = new self();
-                if (!is_null($vParams))
-                {
-                    $vCreateParams = \array_pop($vParams);
-                    if (\array_key_exists('ProductName', $vCreateParams))
-                    { $instance->m_ProductName = $vCreateParams['ProductName']; }
+    public static function WithParams($vParams)
+    {
+        $instance = new self();
+        if (!is_null($vParams)) {
+            $vCreateParams = \array_pop($vParams);
+            if (\array_key_exists('ProductName', $vCreateParams)) {
+                $instance->m_ProductName = $vCreateParams['ProductName'];
+            }
 
-            if (\array_key_exists('ProductId', $vCreateParams))
-                    { $instance->m_ProductId = $vCreateParams['ProductId']; }
+            if (\array_key_exists('ProductId', $vCreateParams)) {
+                $instance->m_ProductId = $vCreateParams['ProductId'];
+            }
 
-            if (\array_key_exists('ProductURL', $vCreateParams))
-                    { $instance->m_DescriptionUrl = $vCreateParams['ProductURL']; }
+            if (\array_key_exists('ProductURL', $vCreateParams)) {
+                $instance->m_DescriptionUrl = $vCreateParams['ProductURL'];
+            }
         }
-                return $instance;
-	}
+        return $instance;
+    }
         
         
-        public function getCreateDate() {
-            return $this->m_CreateDate;
-        }
+    public function getCreateDate()
+    {
+        return $this->m_CreateDate;
+    }
 
-        public function setCreateDate($m_CreateDate) {
-            $this->m_CreateDate = $m_CreateDate;
-            return $this;
-        }
+    public function setCreateDate($m_CreateDate)
+    {
+        $this->m_CreateDate = $m_CreateDate;
+        return $this;
+    }
 
         
-	/**
-	* Getters and Setters
-	*/
-	public function getProductId() {
-		return $this->m_ProductId;
-	}
+    /**
+    * Getters and Setters
+    */
+    public function getProductId()
+    {
+        return $this->m_ProductId;
+    }
 
-	public function setProductId($ProductId) {
-		$this->m_ProductId = $ProductId;
-	}
+    public function setProductId($ProductId)
+    {
+        $this->m_ProductId = $ProductId;
+    }
 
-	public function getProductName() {
-		return $this->m_ProductName;
-	}
+    public function getProductName()
+    {
+        return $this->m_ProductName;
+    }
 
-	public function setProductName($ProductName) {
-		$this->m_ProductName = $ProductName;
-	}
+    public function setProductName($ProductName)
+    {
+        $this->m_ProductName = $ProductName;
+    }
 
-	public function getDescriptionUrl() {
-            if (!empty($this->m_DescriptionUrl)) {
-                if (\BtcRelax\Utils::is_url($this->m_DescriptionUrl))
-                { return $this->m_DescriptionUrl; } else 
-                {return \sprintf("%s/%s", INFO_URL,  $this->m_DescriptionUrl);}
-            } 
-	}
+    public function getDescriptionUrl()
+    {
+        if (!empty($this->m_DescriptionUrl)) {
+            if (\BtcRelax\Utils::is_url($this->m_DescriptionUrl)) {
+                return $this->m_DescriptionUrl;
+            } else {
+                return \sprintf("%s/%s", INFO_URL, $this->m_DescriptionUrl);
+            }
+        }
+    }
 
-	public function setDescriptionUrl($DescriptionUrl) {
-            $this->m_DescriptionUrl = $DescriptionUrl;
-	}
+    public function setDescriptionUrl($DescriptionUrl)
+    {
+        $this->m_DescriptionUrl = $DescriptionUrl;
+    }
 
-	/**
-	* Methods
-	*/
-	public function __toString() {
-		return "";
-	}
-    
+    /**
+    * Methods
+    */
+    public function __toString()
+    {
+        return "";
+    }
 }

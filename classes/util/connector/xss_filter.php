@@ -19,14 +19,16 @@
 
 //original name was lx_externalinput_clean
 //renamed to prevent possible conflicts
-class dhx_externalinput_clean {
+class dhx_externalinput_clean
+{
     // this basic clean should clean html code from
     // lot of possible malicious code for Cross Site Scripting
-    // use it whereever you get external input    
+    // use it whereever you get external input
     
     // you can also set $filterOut to some use html cleaning, but I don't know of any code, which could
     //  exploit that. But if you want to be sure, set it to eg. array("Tidy","Dom");
-    static function basic($string, $filterIn = array("Tidy","Dom","Striptags"), $filterOut = "none") {
+    public static function basic($string, $filterIn = array("Tidy","Dom","Striptags"), $filterOut = "none")
+    {
         $string = self::tidyUp($string, $filterIn);
         $string = str_replace(array("&amp;", "&lt;", "&gt;"), array("&amp;amp;", "&amp;lt;", "&amp;gt;"), $string);
         
@@ -46,7 +48,7 @@ class dhx_externalinput_clean {
         $string = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\"]*)[\x00-\x20\/]*data[\x00-\x20]*:#Uu', '$1=$2nodata...', $string);
         
         //remove any style attributes, IE allows too much stupid things in them, eg.
-        //<span style="width: expression(alert('Ping!'));"></span> 
+        //<span style="width: expression(alert('Ping!'));"></span>
         // and in general you really don't want style declarations in your UGC
 
         $string = preg_replace('#(<[^>]+[\x00-\x20\"\'\/])style[^>]*>#iUu', "$1>", $string);
@@ -63,7 +65,8 @@ class dhx_externalinput_clean {
         return self::tidyUp($string, $filterOut);
     }
     
-    static function tidyUp($string, $filters) {
+    public static function tidyUp($string, $filters)
+    {
         if (is_array($filters)) {
             foreach ($filters as $filter) {
                 $return = self::tidyUpWithFilter($string, $filter);
@@ -82,23 +85,26 @@ class dhx_externalinput_clean {
         }
     }
     
-    static private function tidyUpWithFilter($string, $filter) {
+    private static function tidyUpWithFilter($string, $filter)
+    {
         if (is_callable(array("self", "tidyUpModule" . $filter))) {
             return call_user_func(array("self", "tidyUpModule" . $filter), $string);
         }
         return false;
     }
     
-    static private function tidyUpModuleStriptags($string) {
-        
+    private static function tidyUpModuleStriptags($string)
+    {
         return strip_tags($string);
     }
     
-    static private function tidyUpModuleNone($string) {
+    private static function tidyUpModuleNone($string)
+    {
         return $string;
     }
     
-    static private function tidyUpModuleDom($string) {
+    private static function tidyUpModuleDom($string)
+    {
         $dom = new domdocument();
         @$dom->loadHTML("<html><body>" . $string . "</body></html>");
         $string = '';
@@ -108,20 +114,21 @@ class dhx_externalinput_clean {
         return $string;
     }
     
-    static private function tidyUpModuleTidy($string) {
+    private static function tidyUpModuleTidy($string)
+    {
         if (class_exists("tidy")) {
             $tidy = new tidy();
-            $tidyOptions = array("output-xhtml" => true, 
-                                 "show-body-only" => true, 
-                                 "clean" => true, 
-                                 "wrap" => "350", 
-                                 "indent" => true, 
+            $tidyOptions = array("output-xhtml" => true,
+                                 "show-body-only" => true,
+                                 "clean" => true,
+                                 "wrap" => "350",
+                                 "indent" => true,
                                  "indent-spaces" => 1,
-                                 "ascii-chars" => false, 
-                                 "wrap-attributes" => false, 
-                                 "alt-text" => "", 
-                                 "doctype" => "loose", 
-                                 "numeric-entities" => true, 
+                                 "ascii-chars" => false,
+                                 "wrap-attributes" => false,
+                                 "alt-text" => "",
+                                 "doctype" => "loose",
+                                 "numeric-entities" => true,
                                  "drop-proprietary-attributes" => true,
                                  "enclose-text" => false,
                                  "enclose-block-text" => false
@@ -136,33 +143,40 @@ class dhx_externalinput_clean {
     }
 }
 
-define("DHX_SECURITY_SAFETEXT",  1);
+define("DHX_SECURITY_SAFETEXT", 1);
 define("DHX_SECURITY_SAFEHTML", 2);
 define("DHX_SECURITY_TRUSTED", 3);
 
-class ConnectorSecurity{
-    static public $xss = DHX_SECURITY_SAFETEXT;
-    static public $security_key = false;
-    static public $security_var = "dhx_security";
+class ConnectorSecurity
+{
+    public static $xss = DHX_SECURITY_SAFETEXT;
+    public static $security_key = false;
+    public static $security_var = "dhx_security";
 
-    static private $filterClass = null;
-    static function filter($value, $mode = false){
-        if ($mode === false)
+    private static $filterClass = null;
+    public static function filter($value, $mode = false)
+    {
+        if ($mode === false) {
             $mode = ConnectorSecurity::$xss;
+        }
 
-        if ($mode == DHX_SECURITY_TRUSTED)
+        if ($mode == DHX_SECURITY_TRUSTED) {
             return $value;
-        if ($mode == DHX_SECURITY_SAFETEXT)
+        }
+        if ($mode == DHX_SECURITY_SAFETEXT) {
             return filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
-        if ($mode == DHX_SECURITY_SAFEHTML){
-            if (ConnectorSecurity::$filterClass == null)
+        }
+        if ($mode == DHX_SECURITY_SAFEHTML) {
+            if (ConnectorSecurity::$filterClass == null) {
                 ConnectorSecurity::$filterClass = new dhx_externalinput_clean();
+            }
             return ConnectorSecurity::$filterClass->basic($value);
         }
         throw new Error("Invalid security mode:"+$mode);
     }
 
-    static function CSRF_detected(){
+    public static function CSRF_detected()
+    {
         LogMaster::log("[SECURITY] Possible CSRF attack detected", array(
             "referer" => $_SERVER["HTTP_REFERER"],
             "remote" => $_SERVER["REMOTE_ADDR"]
@@ -170,23 +184,27 @@ class ConnectorSecurity{
         LogMaster::log("Request data", $_POST);
         die();
     }
-    static function checkCSRF($edit){
-        if (ConnectorSecurity::$security_key){
-            if (!isset($_SESSION)) 
+    public static function checkCSRF($edit)
+    {
+        if (ConnectorSecurity::$security_key) {
+            if (!isset($_SESSION)) {
                 @session_start();
+            }
 
-            if ($edit=== true){
-                if (!isset($_POST[ConnectorSecurity::$security_var]))
+            if ($edit=== true) {
+                if (!isset($_POST[ConnectorSecurity::$security_var])) {
                     return ConnectorSecurity::CSRF_detected();
+                }
                 $master_key = $_SESSION[ConnectorSecurity::$security_var];
                 $update_key = $_POST[ConnectorSecurity::$security_var];
-                if ($master_key != $update_key)
+                if ($master_key != $update_key) {
                     return ConnectorSecurity::CSRF_detected();
+                }
 
                 return "";
             }
             //data loading
-            if (!array_key_exists(ConnectorSecurity::$security_var,$_SESSION)){
+            if (!array_key_exists(ConnectorSecurity::$security_var, $_SESSION)) {
                 $_SESSION[ConnectorSecurity::$security_var] = md5(uniqid());
             }
 
@@ -195,5 +213,4 @@ class ConnectorSecurity{
 
         return "";
     }
-
 }

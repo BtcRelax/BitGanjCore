@@ -21,11 +21,11 @@ This program is free software: you can redistribute it and/or modify
  *
  * @author Matej Danter
  */
-interface SignatureInterface {
+interface SignatureInterface
+{
     public function __construct($r, $s);
 
     public function getR();
 
     public function getS();
 }
-?>

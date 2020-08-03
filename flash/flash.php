@@ -4,8 +4,6 @@ namespace BtcRelax;
 
 use \Exception;
 
-
-
 /**
 
  * Class managing flash messages.
@@ -18,34 +16,30 @@ use \Exception;
 
  */
 
-final class Flash {
-
-
-
+final class Flash
+{
     const FLASHES_KEY = '_flashes';
 
     private static $flashes = null;
 
-    private function __construct() {
-
+    private function __construct()
+    {
     }
 
 
 
-    public static function hasFlashes() {
-
+    public static function hasFlashes()
+    {
         self::initFlashes();
         return count(self::$flashes) > 0;
     }
 
 
 
-    public static function addFlash($message) {
-
+    public static function addFlash($message)
+    {
         if (!strlen(trim($message))) {
-
             throw new Exception('Cannot insert empty flash message.');
-
         }
         self::initFlashes();
         self::$flashes[] = $message;
@@ -61,8 +55,8 @@ final class Flash {
 
      */
 
-    public static function getFlashes() {
-
+    public static function getFlashes()
+    {
         self::initFlashes();
 
         $copy = self::$flashes;
@@ -70,31 +64,21 @@ final class Flash {
         self::$flashes = [];
 
         return $copy;
-
     }
 
 
 
-    private static function initFlashes() {
-
+    private static function initFlashes()
+    {
         if (self::$flashes !== null) {
             return;
         }
 
-        if (isset($_SESSION))
-        {
+        if (isset($_SESSION)) {
             if (!array_key_exists(self::FLASHES_KEY, $_SESSION)) {
-                 $_SESSION[self::FLASHES_KEY] = [];
+                $_SESSION[self::FLASHES_KEY] = [];
             }
-            self::$flashes = &$_SESSION[self::FLASHES_KEY];   
-        }        
-
+            self::$flashes = &$_SESSION[self::FLASHES_KEY];
+        }
     }
-
-
-
 }
-
-
-
-?>

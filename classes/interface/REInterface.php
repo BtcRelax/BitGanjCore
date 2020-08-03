@@ -1,7 +1,8 @@
 <?php
 namespace BtcRelax;
-interface IRE {
-    
+
+interface IRE
+{
     const BTC = "BTC";
     const UAH = "UAH";
     const USD = "USD";

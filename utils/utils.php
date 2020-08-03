@@ -1,22 +1,24 @@
 <?php
 namespace BtcRelax;
 
-final class Utils {
-
-    public static function createLink($page, array $params = []) {
+final class Utils
+{
+    public static function createLink($page, array $params = [])
+    {
         unset($params['page']);
-        $vUrl = \sprintf('/p/%s?%s', $page, \http_build_query($params) );
+        $vUrl = \sprintf('/p/%s?%s', $page, \http_build_query($params));
         return  $vUrl;
     }
     
-    public static function generateNonce(int $length = 16) {
-		return bin2hex(openssl_random_pseudo_bytes($length));
+    public static function generateNonce(int $length = 16)
+    {
+        return bin2hex(openssl_random_pseudo_bytes($length));
     }
  
-    public static function getHeaders():array {
+    public static function getHeaders():array
+    {
         if (!function_exists('getallheaders')) {
-            foreach ($_SERVER as $name => $value) 
-                { /* RFC2616 (HTTP/1.1) defines header fields as case-insensitive entities. */
+            foreach ($_SERVER as $name => $value) { /* RFC2616 (HTTP/1.1) defines header fields as case-insensitive entities. */
                 if (strtolower(substr($name, 0, 5)) == 'http_') {
                     $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
                 }
@@ -27,73 +29,85 @@ final class Utils {
         return ($headers);
     }
     
-    public static function isJson($p_input):bool {
+    public static function isJson($p_input):bool
+    {
         $input=trim($p_input);
-        if ((substr($input, 0, 1) == '{' && substr($input, -1) == '}') or (substr($input, 0, 1) == '[' && substr($input, -1) == ']'))
-            { return true; } else { return false; }
+        if ((substr($input, 0, 1) == '{' && substr($input, -1) == '}') or (substr($input, 0, 1) == '[' && substr($input, -1) == ']')) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
-    public static function getJson($p_input) {
+    public static function getJson($p_input)
+    {
         $result = false;
-        if (\BtcRelax\Utils::isJson($p_input)) 
-            { $result = \json_decode($p_input, 1); }
-        return $result;
+        if (\BtcRelax\Utils::isJson($p_input)) {
+            $result = \json_decode($p_input, 1);
         }
+        return $result;
+    }
         
     public static function toJson(array $data)
     {
         return \json_encode($data);
     }
 
-    public static function formatDate(\DateTime $date = null) {
+    public static function formatDate(\DateTime $date = null)
+    {
         return $date->format('Y-m-d');
     }
 
-    public static function formatDateTime(\DateTime $date) {
+    public static function formatDateTime(\DateTime $date)
+    {
         return     $result = $date->format('Y-m-d H:i:s');
     }
 
 
-    public static function redirect($page = null, array $params = []) {
-        $vUri = \BtcRelax\Utils::getProtocol().'://'. filter_input(\INPUT_SERVER , 'SERVER_NAME') ;
-        if (!is_null($page))
-        {
+    public static function redirect($page = null, array $params = [])
+    {
+        $vUri = \BtcRelax\Utils::getProtocol().'://'. filter_input(\INPUT_SERVER, 'SERVER_NAME') ;
+        if (!is_null($page)) {
             $vUri = \BtcRelax\Utils::createLink($page, $params);
-            
         }
         header('Location: ' . $vUri);
         die();
     }
 
-    public static function is_mail(string $mail):bool {
-	if (preg_match("/^[0-9a-zA-Z\.\-\_]+\@[0-9a-zA-Z\.\-\_]+\.[0-9a-zA-Z\.\-\_]+$/is", trim($mail))) {
-            return true;
-        }
-        return false;
-    } 
-    
-    public static function is_url(string $pUrl): bool {
-	if (\preg_match("/(http(s?):\/\/)([a-z0-9\-]+\.)+[a-z]{2,4}(\.[a-z]{2,4})*(\/[^ ]+)*/i", trim($pUrl))) {
+    public static function is_mail(string $mail):bool
+    {
+        if (preg_match("/^[0-9a-zA-Z\.\-\_]+\@[0-9a-zA-Z\.\-\_]+\.[0-9a-zA-Z\.\-\_]+$/is", trim($mail))) {
             return true;
         }
         return false;
     }
     
-   public static function getRequestMethod():string {
+    public static function is_url(string $pUrl): bool
+    {
+        if (\preg_match("/(http(s?):\/\/)([a-z0-9\-]+\.)+[a-z]{2,4}(\.[a-z]{2,4})*(\/[^ ]+)*/i", trim($pUrl))) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static function getRequestMethod():string
+    {
         return \filter_input(\INPUT_SERVER, 'REQUEST_METHOD');
     }
     
-    public static function getRequestUrl():string {
-        $server_name = \filter_input(\INPUT_SERVER,'SERVER_NAME');
+    public static function getRequestUrl():string
+    {
+        $server_name = \filter_input(\INPUT_SERVER, 'SERVER_NAME');
         $server_port = \filter_input(\INPUT_SERVER, 'SERVER_PORT');
-        $current_url  = ( \filter_input(\INPUT_SERVER, 'HTTPS') != 'on' ) ? 'http://'.$server_name :  'https://'.$server_name;
-        $current_url .= ( $server_port != 80 || $server_port != 443   ) ? ":".$server_port : ""; 
-        $current_url .= \filter_input(\INPUT_SERVER,'REQUEST_URI');
+        $current_url  = (\filter_input(\INPUT_SERVER, 'HTTPS') != 'on') ? 'http://'.$server_name :  'https://'.$server_name;
+        $current_url .= ($server_port != 80 || $server_port != 443) ? ":".$server_port : "";
+        $current_url .= \filter_input(\INPUT_SERVER, 'REQUEST_URI');
         return $current_url;
     }
     
     
-    public static function GetNewPair() {
+    public static function GetNewPair()
+    {
         $config = array(
             "digest_alg" => "sha512",
             "private_key_bits" => 384,
@@ -140,7 +154,8 @@ final class Utils {
     }
     
     
-    private static function cleanInputs($data) {
+    private static function cleanInputs($data)
+    {
         $clean_input = [];
         if (is_array($data)) {
             foreach ($data as $k => $v) {
@@ -156,53 +171,58 @@ final class Utils {
         return $clean_input;
     }
     
-    public static function httpGet(string $url, $post_vars = false) {
-	//header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
+    public static function httpGet(string $url, $post_vars = false)
+    {
+        //header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
         //header('Pragma: no-cache'); // HTTP 1.0.
         //header('Expires: 0'); // Proxies.
         $post_contents = '';
-		if (is_array($post_vars)) {
-			foreach($post_vars as $key => $val) {
-				$post_contents .= ($post_contents ? '&' : '').urlencode($key).'='.urlencode($val);
-			}
-		} else {
-			$post_contents = $post_vars;
-		}
-	$uinf = \parse_url($url);
-	$host = $uinf['host'];
-	$path = $uinf['path'];
-	$path .= (isset($uinf['query']) && $uinf['query']) ? ('?'.$uinf['query']) : '';
-	$headers = array(
-		($post_contents ? 'POST' : 'GET')." $path HTTP/1.1",
-		"Host: $host",
-	);
-	if ($post_contents) {
-		$headers[] = 'Content-Type: application/x-www-form-urlencoded';
-		$headers[] = 'Content-Length: '.strlen($post_contents);
-	}
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-	curl_setopt($ch, CURLOPT_URL,$url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 600);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	if ($post_contents) {
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_contents);
-	}
-	$data = curl_exec($ch);
-	if (\curl_errno($ch)) { return false; }
-	curl_close($ch);
-	return $data;
+        if (is_array($post_vars)) {
+            foreach ($post_vars as $key => $val) {
+                $post_contents .= ($post_contents ? '&' : '').urlencode($key).'='.urlencode($val);
+            }
+        } else {
+            $post_contents = $post_vars;
+        }
+        $uinf = \parse_url($url);
+        $host = $uinf['host'];
+        $path = $uinf['path'];
+        $path .= (isset($uinf['query']) && $uinf['query']) ? ('?'.$uinf['query']) : '';
+        $headers = array(
+        ($post_contents ? 'POST' : 'GET')." $path HTTP/1.1",
+        "Host: $host",
+    );
+        if ($post_contents) {
+            $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+            $headers[] = 'Content-Length: '.strlen($post_contents);
+        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 600);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        if ($post_contents) {
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $post_contents);
+        }
+        $data = curl_exec($ch);
+        if (\curl_errno($ch)) {
+            return false;
+        }
+        curl_close($ch);
+        return $data;
     }
     
-    public static function getIpAddress()  {
+    public static function getIpAddress()
+    {
         $ip = \filter_input(\INPUT_SERVER, 'REMOTE_ADDR');
         return isset($ip)? $ip: false;
     }
 
-    public static function getIpAddressFromProxy()    {      
+    public static function getIpAddressFromProxy()
+    {
         $header = 'HTTP_X_FORWARDED_FOR';
         if (!isset($_SERVER[$header]) || empty($_SERVER[$header])) {
             return false;
@@ -226,7 +246,8 @@ final class Utils {
         return $ip;
     }
         
-    public static  function getProtocol():string {
-        return \filter_input(\INPUT_SERVER,"SERVER_PROTOCOL");
+    public static function getProtocol():string
+    {
+        return \filter_input(\INPUT_SERVER, "SERVER_PROTOCOL");
     }
 }
