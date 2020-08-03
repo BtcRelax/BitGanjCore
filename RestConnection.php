@@ -8,8 +8,8 @@ include_once "RestResponse.php";
 
 namespace BtcRelax;
 
-class RestConnection {
-
+class RestConnection
+{
     private $url = "";
     private $response = "";
     private $responseBody = "";
@@ -19,17 +19,19 @@ class RestConnection {
     private $username = null;
     private $password = null;
 
-    public function RestConnection($url, $params1, $params2) {
+    public function RestConnection($url, $params1, $params2)
+    {
         $pathParams = null;
         $params = null;
         if (isset($params2)) {
             $pathParams = $params1;
             $params = $params2;
-        } else if ($params1) {
+        } elseif ($params1) {
             $params = $params1;
         }
-        if ($url == null)
+        if ($url == null) {
             throw new Exception('$url parameter cannot be empty in RestConnection()');
+        }
         $this->url = $url;
         if ($pathParams != null) {
             foreach ($pathParams as $key => $value) {
@@ -41,18 +43,22 @@ class RestConnection {
         $this->req = new HTTP_Request($this->url);
     }
 
-    public function setAuthentication($username, $password) {
+    public function setAuthentication($username, $password)
+    {
         $this->username = $username;
         $this->password = $password;
-        if ($this->username != null && $this->password != null)
+        if ($this->username != null && $this->password != null) {
             $this->req->setBasicAuth($this->username, $this->password);
+        }
     }
 
-    public function getDate() {
+    public function getDate()
+    {
         return $this->date;
     }
 
-    public function setHeaders($headers = array("")) {
+    public function setHeaders($headers = array(""))
+    {
         //remove all previous headers
         foreach ($this->headers as $key => $value) {
             $this->req->removeHeader($key);
@@ -63,12 +69,14 @@ class RestConnection {
         }
     }
 
-    public function get() {
+    public function get()
+    {
         $this->req->setMethod("GET");
         return $this->connect();
     }
 
-    public function put($data) {
+    public function put($data)
+    {
         if ($data != null) {
             if (is_array($data)) {
                 $this->req->setMethod("PUT");
@@ -81,7 +89,8 @@ class RestConnection {
         return $this->connect();
     }
 
-    public function post($data) {
+    public function post($data)
+    {
         if ($data != null) {
             if (is_array($data)) {
                 $this->req->setMethod("POST");
@@ -94,12 +103,14 @@ class RestConnection {
         return $this->connect();
     }
 
-    public function delete() {
+    public function delete()
+    {
         $this->req->setMethod("DELETE");
         return $this->connect();
     }
 
-    public function connect() {
+    public function connect()
+    {
         $this->response = $this->req->sendRequest();
 
         if (PEAR::isError($this->response)) {
@@ -116,7 +127,8 @@ class RestConnection {
         return $response;
     }
 
-    private function encodeUrl($url, $params) {
+    private function encodeUrl($url, $params)
+    {
         $encodedParams = $this->encodeParams($params);
         if (strlen($encodedParams) > 0) {
             $encodedParams = "?" . $encodedParams;
@@ -125,12 +137,14 @@ class RestConnection {
         return $url . $encodedParams;
     }
 
-    private function encodeParams($params) {
+    private function encodeParams($params)
+    {
         $p = "";
         if ($params != null) {
             foreach ($params as $key => $value) {
-                if ($value != null)
+                if ($value != null) {
                     $p = $p . $key . "=" . urlencode($value) . "&";
+                }
             }
             $p = substr($p, 0, strlen($p) - 1);
         }
@@ -138,11 +152,9 @@ class RestConnection {
         return $p;
     }
 
-    public static function currentTimeMillis() {
+    public static function currentTimeMillis()
+    {
         list($usec, $sec) = explode(" ", microtime());
         return round(((float) $usec + (float) $sec) * 1000);
     }
-
 }
-
-

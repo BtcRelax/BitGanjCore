@@ -1,41 +1,46 @@
 <?php
 namespace BtcRelax;
 
-class RestResponse {
-
+class RestResponse
+{
     private $responseCode = "";
     private $responseBody = "";
 
-    public function RestResponse() {
-        
+    public function RestResponse()
+    {
     }
 
-    public function setResponseBody($msg) {
+    public function setResponseBody($msg)
+    {
         $this->responseBody = $msg;
     }
 
-    public function getResponseBody() {
+    public function getResponseBody()
+    {
         return $this->responseBody;
     }
 
-    public function setResponseCode($code) {
+    public function setResponseCode($code)
+    {
         $this->responseCode = $code;
     }
 
-    public function getResponseCode() {
+    public function getResponseCode()
+    {
         return $this->responseCode;
     }
 
-    public function getDataAsString() {
+    public function getDataAsString()
+    {
         return $this->responseBody;
     }
 
-    public function getDataAsXml() {
+    public function getDataAsXml()
+    {
         $xml = simplexml_load_string($this->responseBody);
         if ($xml == false) {
             throw new Exception('Could not parse XML.', $this->responseBody);
         }
         return $xml;
     }
-
 }
