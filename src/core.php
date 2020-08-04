@@ -8,29 +8,29 @@ use const E_STRICT;
 final class Core
 {
     const DEFAULT_PAGE = 'main';
-    const PAGE_DIR = '/BtcRelax/page/';
-    const LAYOUT_DIR = '/BtcRelax/layout/';
+    const PAGE_DIR = '/page/';
+    const LAYOUT_DIR = '/layout/';
     const VER = '1.5.18.2';
         
     private static $CLASSES = [
-    'BtcRelax\Config' => '/config/config.php',
-    'BtcRelax\Flash' => '/flash/flash.php',
-    'BtcRelax\Exception\NotFoundException' => '/exception/NotFoundException.php',
+        'BtcRelax\Config' => '/config.php',
+        'BtcRelax\Flash' => '/flash/flash.php',
+        'BtcRelax\Exception\NotFoundException' => '/exception/NotFoundException.php',
         'BtcRelax\Exception\SessionException' => '/exception/SessionException.php',
         'BtcRelax\Exception\AuthentificationCritical' => '/exception/AuthExceptions.php',
         'BtcRelax\Exception\AccessDeniedException' => '/exception/AccessException.php',
-    'BtcRelax\Exception\AssignBookmarkException' => '/exception/AssignBookmarkException.php',
+        'BtcRelax\Exception\AssignBookmarkException' => '/exception/AssignBookmarkException.php',
         'BtcRelax\Dao\BaseDao' => '/dao/BaseDao.php',
         'BtcRelax\DAO' => '/dao/DAO.php',
         'BtcRelax\Dao\BookmarkDao' => '/dao/BookmarkDao.php',
-    'BtcRelax\Dao\BookmarkSearchCriteria' => '/dao/BookmarkSearchCriteria.php',
-    'BtcRelax\Dao\OrderDao' => '/dao/OrderDao.php',
+        'BtcRelax\Dao\BookmarkSearchCriteria' => '/dao/BookmarkSearchCriteria.php',
+        'BtcRelax\Dao\OrderDao' => '/dao/OrderDao.php',
         'BtcRelax\Dao\OrderSearchCriteria' => '/dao/OrderSearchCriteria.php',
         'BtcRelax\Dao\CustomerDao' => '/dao/CustomerDao.php',
         'BtcRelax\Dao\CustomerRightsDao' => '/dao/CustomerRightsDao.php',
         'BtcRelax\Dao\CustomerPropertyDao' => '/dao/CustomerPropertyDao.php',
         'BtcRelax\Dao\CustomerSearchCriteria' => '/dao/CustomerSearchCriteria.php',
-    'BtcRelax\Dao\IdentifierDao' => '/dao/IdentifierDao.php',
+        'BtcRelax\Dao\IdentifierDao' => '/dao/IdentifierDao.php',
         'BtcRelax\Dao\IdentifierSearchCriteria' => '/dao/IdentifierSearchCriteria.php',
         'BtcRelax\Dao\InvoiceSearchCriteria' => '/dao/InvoiceSearchCriteria.php',
         'BtcRelax\Dao\InvoiceDao' => '/dao/InvoiceDao.php',
@@ -38,7 +38,7 @@ final class Core
         'BtcRelax\Dao\RegionDao' => '/dao/RegionDao.php',
         'BtcRelax\Dao\ProductDao' => '/dao/ProductDao.php',
         'BtcRelax\Mapping\BookmarkMapper' => '/mapping/BookmarkMapper.php',
-    'BtcRelax\Mapping\CustomerMapper' => '/mapping/CustomerMapper.php',
+        'BtcRelax\Mapping\CustomerMapper' => '/mapping/CustomerMapper.php',
         'BtcRelax\Mapping\CustomerRightMapper' => '/mapping/CustomerRightMapper.php',
         'BtcRelax\Mapping\CustomerPropertyMapper' => '/mapping/CustomerPropertyMapper.php',
         'BtcRelax\Mapping\OrderMapper' => '/mapping/OrderMapper.php',
@@ -46,7 +46,7 @@ final class Core
         'BtcRelax\Mapping\IdentifierMapper' => '/mapping/IdentifierMapper.php',
         'BtcRelax\Mapping\ProductMapper' => '/mapping/ProductMapper.php',
         'BtcRelax\Model\Bookmark' => '/model/bookmark.php',
-    'BtcRelax\Model\Customer' => '/model/customer.php',
+        'BtcRelax\Model\Customer' => '/model/customer.php',
         'BtcRelax\Model\CustomerRight' => '/model/customerRight.php',
         'BtcRelax\Model\CustomerProperty' => '/model/customerProperty.php',
         'BtcRelax\Model\Order' => '/model/order.php',
@@ -66,14 +66,14 @@ final class Core
         'BtcRelax\Model\User' => '/model/user.php',
         'BtcRelax\Model\Region' => '/model/region.php',
         'BtcRelax\Model\Product' => '/model/product.php',
-    'BtcRelax\Validation\BookmarkValidator' => '/validation/BookmarkValidator.php',
-    'BtcRelax\Validation\CustomerValidator' => '/validation/CustomerValidator.php',
+        'BtcRelax\Validation\BookmarkValidator' => '/validation/BookmarkValidator.php',
+        'BtcRelax\Validation\CustomerValidator' => '/validation/CustomerValidator.php',
         'BtcRelax\Validation\OrderValidator' => '/validation/OrderValidator.php',
-    'BtcRelax\Validation\ValidationError' => '/validation/ValidationError.php',
-    'BtcRelax\Utils' => '/utils/utils.php',
-    'BtcRelax\BitID' => '/BitID.php',
-    'BtcRelax\Layout\LayoutHeader' => '/layout/header.inc',
-    'BtcRelax\SecureSession' => '/SecureSession.php',
+        'BtcRelax\Validation\ValidationError' => '/validation/ValidationError.php',
+        'BtcRelax\Utils' => '/utils/utils.php',
+        'BtcRelax\BitID' => '/BitID.php',
+        'BtcRelax\Layout\LayoutHeader' => '/layout/header.inc',
+        'BtcRelax\SecureSession' => '/SecureSession.php',
         'Geary' => '/external/Geary.php',
         'BtcRelax\Log' => '/logger.php',
         'QRcode' => '/classes/QRcode.php',
@@ -82,11 +82,13 @@ final class Core
         'BtcRelax\DbSession' => '/classes/DbSession.php'
     ];
     
-    private $current_session ;
+    private static $current_session ;
     private static $instance;
-    protected $request;
-    public static $events = array();
+    private static $request;
+    private static $events = array();
+    private static $config;
  
+    
     public static function bindEvent($event, $callback, $obj = null)
     {
         if (!self::$events[$event]) {
@@ -108,25 +110,20 @@ final class Core
             }
         }
     }
-
-    public function __construct()
-    {
-        require_once __DIR__.'/logger.php';
-    }
         
-    public static function getIstance(bool $pIsExceptionHandler = true): \BtcRelax\Core
+    public static function getIstance(): \BtcRelax\Core
     {
         if (!isset(self::$instance)) {
             $c = __CLASS__;
             self::$instance = new $c;
-            self::$instance->init($pIsExceptionHandler);
+            self::$instance->init();
         }
         return self::$instance;
     }
         
-    public function getRequest(): \BtcRelax\Request
+    public static function getRequest():\BtcRelax\Request
     {
-        return $this->_request;
+        return self::$request;
     }
     
     public static function getVersion():array
@@ -142,24 +139,10 @@ final class Core
         return $param;
     }
 
-    private function init(bool $vIsExceptionHandler = true)
+    private static function init()
     {
-        try {
-            \spl_autoload_register([$this, 'loadClass']);
-            if ($vIsExceptionHandler) {
-                \set_exception_handler([$this, 'handleException']);
-            }
-            config::init();
-            $this->request = new \BtcRelax\Request();
-            if ((\defined(SIDNAME)) && isset($_COOKIE[SIDNAME])) {
-                $this->initSession();
-            }
-            self::logError(\sprintf('Core version:%s initialized - succesfully!', self::VER), \BtcRelax\Log::INFO);
-        } catch (Exception $err) {
-            self::logError($err, Log::FATAL);
-        } catch (\Error $err) {
-            self::logError($err, Log::FATAL);
-        }
+        \spl_autoload_register([$this, 'loadClass']);
+        \set_exception_handler([$this, 'handleException']);
     }
 
     public function startSession()
@@ -168,11 +151,6 @@ final class Core
         return $this->current_session->startSession();
     }
      
-    private function initSession(): \BtcRelax\SecureSession
-    {
-        $this->current_session = \BtcRelax\SecureSession::getIstance();
-        $this->current_session->init();
-    }
     
     public static function createApiClient(): \BtcRelax\APIClient
     {
@@ -338,17 +316,6 @@ final class Core
         }
         if (!$run) {
             die('Page "' . $page . '" has neither script nor template!');
-        }
-    }
-
-    public static function logError($error)
-    {
-        try {
-            \BtcRelax\Log::general($error, \BtcRelax\Log::ERROR);
-        } catch (Exception $exc) {
-            $date = \date('d/m/Y h:i:s a', \time());
-            $msg = \sprintf("%s : Core unable to use logger, because:%s. While catched error.", $date, $exc->getMessage());
-            \error_log($msg, 1, "god@fastfen.club");
         }
     }
 

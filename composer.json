@@ -1,10 +1,10 @@
 {
     "name": "btcrelax/bitganj-core",
     "type": "library",
-    "version": "v1.0.1",
+    "version": "v1.0.2",
     "description": "Core BtcRelax Shop libraries",
     "keywords": ["framework", "http", "rest", "web service", "curl", "client", "HTTP client"],
-    "homepage": "http://bitganj.website/",
+    "homepage": "http://fastfen.club/",
     "license": "Unlicense",
     "authors": [
         {
