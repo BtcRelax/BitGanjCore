@@ -71,7 +71,7 @@ final class Core
         'BtcRelax\Validation\ValidationError' => '/validation/ValidationError.php',
         'BtcRelax\Utils' => '/utils/utils.php',
         'BtcRelax\BitID' => '/BitID.php',
-        'BtcRelax\Layout\LayoutHeader' => '/layout/header.inc',
+        'BtcRelax\Layout\header' => '/layout/header.php',
         'Geary' => '/external/Geary.php',
         'BtcRelax\Log' => '/logger.php',
         'QRcode' => '/classes/QRcode.php',
@@ -149,7 +149,7 @@ final class Core
 
     public function startSession()
     {
-        $this->current_session = \BtcRelax\SecureSession::getIstance();
+        $this->current_session = \BtcRelax\Session::getIstance();
         return $this->current_session->startSession();
     }
      
@@ -187,7 +187,7 @@ final class Core
         
     public function getCurrentSession(): \BtcRelax\Session
     {
-        if ($this->current_session instanceof \BtcRelax\SecureSession) {
+        if ($this->current_session instanceof \BtcRelax\Session) {
             return $this->current_session;
         } else {
             \BtcRelax\Log::general("Incorrect session instance inside core!", \BtcRelax\Log::FATAL);
@@ -196,15 +196,15 @@ final class Core
             
     public function getDefaultPage()
     {
-        switch (\BtcRelax\SecureSession::getSessionState()) {
-            case SecureSession::STATUS_GUEST:
+        switch (\BtcRelax\Session::getSessionState()) {
+            case Session::STATUS_GUEST:
                 $result_page = 'guest';
                 break;
-            case SecureSession::STATUS_USER:
-            case SecureSession::STATUS_ROOT:
+            case Session::STATUS_USER:
+            case Session::STATUS_ROOT:
                 $result_page = 'user';
                 break;
-            case SecureSession::STATUS_BANNED:
+            case Session::STATUS_BANNED:
                 $result_page = 'banned';
                 break;
             default:
@@ -269,7 +269,7 @@ final class Core
         return \class_exists($name);
     }
 
-    private function getPage($extraParams)
+    private function getPage($extraParams = null)
     {
         if (\property_exists($extraParams, 'page')) {
             $page = $extraParams['page'];
@@ -292,8 +292,9 @@ final class Core
         return $page;
     }
 
-    private function runPage(string $page)
+    private function runPage(string $page = null )
     {
+        if (empty($page)) { $page = $this->GetDefaultPage();  };
         \BtcRelax\Log::general(\sprintf('Try to load page:%s called with method:%s', $page, \BtcRelax\Utils::getRequestMethod()), \BtcRelax\Log::INFO);
         $run = false;
         if ($this->hasScript($page)) {
@@ -324,20 +325,20 @@ final class Core
     private function getScript($page)
     {
         //return filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT') . self::PAGE_DIR . $page . '.php';
-        return ABS_PATH . self::PAGE_DIR . $page . '.php';
+        return self::PAGE_DIR . $page . '.php';
     }
 
     private function getTemplate($page)
     {
-        return ABS_PATH . self::PAGE_DIR . $page . '.phtml';
+        return  self::PAGE_DIR . $page . '.phtml';
     }
     
     private function getHeader()
     {
-        $vState = \BtcRelax\SecureSession::getSessionState();
-        if (($vState === SecureSession::STATUS_USER) || ($vState === SecureSession::STATUS_ROOT)
-                    || ($vState === SecureSession::STATUS_BANNED)) {
-            return new \BtcRelax\Layout\LayoutHeader();
+        $vState = \BtcRelax\Session::getSessionState();
+        if (($vState === Session::STATUS_USER) || ($vState === Session::STATUS_ROOT)
+                    || ($vState === Session::STATUS_BANNED)) {
+            return new \BtcRelax\Layout\header();
         }
     }
                 

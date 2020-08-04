@@ -2,7 +2,7 @@
 
 namespace BtcRelax\Layout;
 
-final class LayoutHeader {
+final class header {
 
     //const HEADER_BEGIN = '<div id="toolbarObj"  class="collapse navbar-collapse">
     //		  <ul class="nav navbar-nav">';
