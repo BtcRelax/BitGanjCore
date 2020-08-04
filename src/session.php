@@ -3,7 +3,7 @@ namespace BtcRelax;
 
 use BtcRelax\Dao\SessionsDao;
 
-final class SecureSession extends DbSession
+final class Session extends DbSession
 {
     const STATUS_NOT_INIT = "NOT_INITIALIZED";
     const STATUS_UNAUTH = "UNAUTHENTICATED";
@@ -26,18 +26,44 @@ final class SecureSession extends DbSession
     }
     
     
-    public static function getIstance(): \BtcRelax\SecureSession
+    public static function getIstance(): \BtcRelax\Session
     {
         if (!isset(self::$instance)) {
             $c = __CLASS__;
             self::$instance = new $c;
-            self::$instance->setUp();
+            self::$instance->init();
         }
         return self::$instance;
     }
     
     public function init()
     {
+        //print_r($config);
+        //$this->_MYSESSION_CONF=$config;
+
+        $this->db_type = 'mysql';
+        $this->db_name = DB_NAME;
+        $this->db_pass = DB_PASS;
+        $this->db_server = DB_HOST;
+        $this->db_username = DB_USER;
+
+        
+        $this->table_name_session = 'Sessions';
+        $this->table_name_variable = 'SessionVars';
+        $this->table_column_sid = 'sid';
+        $this->table_column_name = 'name';
+        $this->table_column_value = 'value';
+        $this->table_column_fexp = 'forced_expires';
+        $this->table_column_ua = 'ua';
+        $this->table_column_exp = 'expires';
+
+        $this->sid_len = 10;
+        $this->session_duration = intval(SESS_DURATION);
+        $this->session_max_duration = intval(SESS_MAX_DURATION);
+        $this->encrypt_data = false;
+        $this->encrypt_key = "godjah";
+        $this->dbConnection();
+            
         parent::readSessionId();
         //check if i have to overwrite php
         //yes.. i'm the best so i overwrite php function
@@ -63,6 +89,33 @@ final class SecureSession extends DbSession
         session_start();
     }
 
+    
+   /**
+     * Read actual sessionId or create a new one
+     *
+     * @access private
+     */
+    protected function readSessionId()
+    {
+        if (isset($_COOKIE[SIDNAME])) { //there some jam in the cookie
+            $this->sessionId=$_COOKIE[SIDNAME];
+            //check if the jam can be eated
+            if ($this->checkSessionId()) {
+                $num = $this->getSidCount($this->sessionId);
+                if ($num === 1) {
+                    $this->loadSesionVars();
+                } else {
+                    trigger_error(\sprintf("Session id:%s not fount in db.", $this->sessionId), E_USER_ERROR);
+                }
+                //setcookie (SIDNAME, $this->sessionId,time()+$this->session_duration,"/",'',false,true);
+            } else {
+                $this->destroySession(false);
+                trigger_error("Coockie has session id but UA changed!", E_USER_ERROR);
+            }
+        } else {
+            trigger_error("Coockie has not session id.", E_USER_ERROR);
+        }
+    }    
     
     public static function getSessionsCount()
     {

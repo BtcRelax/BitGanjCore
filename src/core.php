@@ -2,8 +2,6 @@
 namespace BtcRelax;
 
 use BtcRelax\Exception\NotFoundException;
-use Exception;
-use const E_STRICT;
 
 final class Core
 {
@@ -14,6 +12,7 @@ final class Core
         
     private static $CLASSES = [
         'BtcRelax\Config' => '/config.php',
+        'BtcRelax\Session' => '/session.php',
         'BtcRelax\Flash' => '/flash/flash.php',
         'BtcRelax\Exception\NotFoundException' => '/exception/NotFoundException.php',
         'BtcRelax\Exception\SessionException' => '/exception/SessionException.php',
@@ -73,7 +72,6 @@ final class Core
         'BtcRelax\Utils' => '/utils/utils.php',
         'BtcRelax\BitID' => '/BitID.php',
         'BtcRelax\Layout\LayoutHeader' => '/layout/header.inc',
-        'BtcRelax\SecureSession' => '/SecureSession.php',
         'Geary' => '/external/Geary.php',
         'BtcRelax\Log' => '/logger.php',
         'QRcode' => '/classes/QRcode.php',
@@ -82,11 +80,14 @@ final class Core
         'BtcRelax\DbSession' => '/classes/DbSession.php'
     ];
     
-    private static $current_session ;
+
     private static $instance;
-    private static $request;
     private static $events = array();
-    private static $config;
+
+    private $config;
+    private $request;
+    private $session;
+    
  
     
     public static function bindEvent($event, $callback, $obj = null)
@@ -139,10 +140,11 @@ final class Core
         return $param;
     }
 
-    private static function init()
+    private function init()
     {
         \spl_autoload_register([$this, 'loadClass']);
         \set_exception_handler([$this, 'handleException']);
+        $this->config = \BtcRelax\Config::getIstance();     
     }
 
     public function startSession()
@@ -183,7 +185,7 @@ final class Core
         return $vAM->getUser();
     }
         
-    public function getCurrentSession(): \BtcRelax\SecureSession
+    public function getCurrentSession(): \BtcRelax\Session
     {
         if ($this->current_session instanceof \BtcRelax\SecureSession) {
             return $this->current_session;
@@ -356,16 +358,10 @@ final class Core
         $interfaceFile = $base . "classes/interface/" . $f . "Interface.php";
         if (file_exists($interfaceFile)) {
             require_once $interfaceFile;
-            $result = true;
         }
         $classFile = $base . "classes/" . $f . ".php";
         if (file_exists($classFile)) {
             require_once $classFile;
-            $result = true;
-        }
-        $utilFile = $base . "classes/util/" . $f . ".php";
-        if (file_exists($utilFile)) {
-            require_once $utilFile;
             $result = true;
         }
         $fpath = explode("\\", $f);

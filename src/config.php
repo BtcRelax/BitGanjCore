@@ -11,44 +11,43 @@ final class Config
 {
 
     /** @var array config data */
-    private static $DATA = null;
+    private $DATA = null;
+    private static $instance;
 
-
+    public static function getIstance(): \BtcRelax\Config
+    {
+        if (!isset(self::$instance)) {
+            $c = __CLASS__;
+            self::$instance = new $c;
+            self::$instance->init();
+        }
+        return self::$instance;
+    }
+    
+    
     /**
      * @return array
      * @throws Exception
      */
-    private static function getConfig($section = null)
+    public function getConfig($section = null)
     {
         if (empty($section)) { 
-                return self::getData();
+                return $this->DATA;
             }
-        if (!\array_key_exists($section, self::$DATA)) {
+        if (!\array_key_exists($section, $this->DATA)) {
                 throw new \Exception (\sprintf('Unknown config section: %s', $section));
             }
-        return self::$DATA[$section];
+        return $this->DATA[$section];
     }
         
-    public static function init()
+    private function init()
     {
         $cfgfile = \filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT') . '/config/config.ini';
         if (!file_exists($cfgfile)) {
             throw new \Exception(\sprintf('Config file:%s does not exists!',$cfgfile));
         } else {
-            self::$DATA = \parse_ini_file($cfgfile, true);
+            $this->DATA = \parse_ini_file($cfgfile, true);
         }
     }
         
-
-    /**
-     * @return array
-     */
-    private static function getData()
-    {
-        if (self::$DATA !== null) {
-            return self::$DATA;
-        } else {
-            throw new \Exception('Config not initialized!'); 
-        }
-    }
 }
