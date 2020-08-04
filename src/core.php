@@ -5,7 +5,6 @@ use BtcRelax\Exception\NotFoundException;
 
 final class Core
 {
-    const DEFAULT_PAGE = 'main';
     const PAGE_DIR = '/page/';
     const LAYOUT_DIR = '/layout/';
     const VER = '1.5.18.2';
@@ -373,3 +372,4 @@ final class Core
         return $result;
     }
 }
+
