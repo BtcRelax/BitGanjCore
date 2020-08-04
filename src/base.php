@@ -1,3 +1,4 @@
+<?php 
 namespace BtcRelax;
 
 abstract class Base 

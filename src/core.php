@@ -3,7 +3,7 @@ namespace BtcRelax;
 
 use BtcRelax\Exception\NotFoundException;
 
-final class Core
+final class Core extends \BtcRelax\Base
 {
     const PAGE_DIR = '/page/';
     const LAYOUT_DIR = '/layout/';
@@ -113,12 +113,7 @@ final class Core
         
     public static function getIstance(): \BtcRelax\Core
     {
-        if (!isset(self::$instance)) {
-            $c = __CLASS__;
-            self::$instance = new $c;
-            self::$instance->init();
-        }
-        return self::$instance;
+        return parent::getIstance();
     }
         
     public static function getRequest():\BtcRelax\Request
@@ -139,7 +134,7 @@ final class Core
         return $param;
     }
 
-    private function init()
+    protected function init()
     {
         \spl_autoload_register([$this, 'loadClass']);
         \set_exception_handler([$this, 'handleException']);
