@@ -2,7 +2,7 @@
 
 namespace BtcRelax;
 
-class Log {
+class Logger {
 
     const FATAL = -1;
     const ERROR = 0;
@@ -11,9 +11,7 @@ class Log {
     const DEBUG = 3;
 
     public static function general($msg, $logLevel = 0) {
-        $max = self::getMaxLogLevel();
-        if ($logLevel <= $max) {
-            $date = date('d.m.Y h:i:s');
+         $date = date('d.m.Y h:i:s');
             $log = \sprintf('%s: Level: %s|', $date, $logLevel);
             if (!empty(session_id())) {
                 $log .= \sprintf('Session: %s|', session_id());
@@ -27,11 +25,6 @@ class Log {
             if ($logLevel < self::ERROR) {
                 die;
             }
-        }
-    }
-
-    public static function getMaxLogLevel() {
-        return defined('LOG_LEVEL') ? LOG_LEVEL : self::ERROR;
     }
 
 }

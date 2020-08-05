@@ -15,27 +15,30 @@ class BaseDao
         $this->db = null;
     }
 
-    public function __construct($db = null, $autocommit = true)
+    public function __construct(PDO $db)
     {
-        $this->autocommit = $autocommit;
-        if ($db !== null) {
-            $this->db = $db;
-        } else {
-            try {
-                $this->db = new \PDO(\sprintf("mysql:dbname=%s;host=%s", DB_NAME, DB_HOST), DB_USER, DB_PASS, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8;"));
-                $this->db->setAttribute(\PDO::ATTR_AUTOCOMMIT, $this->getAutocommit() === true ? 1 : 0);
-            } catch (\PDOException $ex) {
-                \BtcRelax\Log::general(new \Exception('DB connection error: ' . $ex->getMessage()), \BtcRelax\Log::FATAL);
-            }
-        }
+        $this->db = $db;
     }
 
-    protected function getAutocommit()
+    public static function prepareConnection(string $db_host, string $db_name, string $db_user, string $db_pass):PDO
     {
-        return $this->autocommit;
+        return new \PDO("mysql:dbname=" . $db_name  . ";host=" . $db_host , $db_user, $db_pass, 
+        array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8; SET time_zone='+03:00';"));        
     }
 
-    public function getDb()
+
+    public function setAutocommit(bool $isAutocommit)
+    {
+        $this->db->setAttribute(\PDO::ATTR_AUTOCOMMIT, \BtcRelax\Utils::formatBoolean($isAutocommit) );
+    }
+
+    public function getAutocommit()
+    {
+        return $this->db->getAttribute(\PDO::ATTR_AUTOCOMMIT);
+    }
+
+
+    public function getDb():PDO
     {
         return $this->db;
     }
@@ -52,8 +55,7 @@ class BaseDao
     public function executeStatement(\PDOStatement $statement, array $params)
     {
         if ($statement->execute($params) === false) {
-            \BtcRelax\Log::general(\sprintf("Error when execute sql:%s", $this->pdo_debugStrParams($statement)), \BtcRelax\Log::ERROR);
-            self::throwDbError($this->getDb()->errorInfo());
+            \BtcRelax\Logger::general(\sprintf("Error message %s  when execute sql:%s ",$this->db->errorInfo(), $this->pdo_debugStrParams($statement)), \BtcRelax\Logger::ERROR);
         }
     }
 
@@ -68,34 +70,18 @@ class BaseDao
 
     public function query($sql)
     {
-        $statement = $this->getDb()->query($sql, PDO::FETCH_ASSOC);
+        $statement = $this->db->query($sql, PDO::FETCH_ASSOC);
         if ($statement === false) {
-            self::throwDbError($this->getDb()->errorInfo());
+            \BtcRelax\Logger::general(\sprintf("Error message %s  when query sql:%s ",$this->db->errorInfo(), $sql), \BtcRelax\Logger::ERROR);
         }
         return $statement;
     }
 
-    public function get_numeric($val)
+    public function get_numeric($val):int
     {
         if (is_numeric($val)) {
             return (int) $val + 0;
         }
         return 0;
-    }
-
-    protected static function throwDbError(array $errorInfo)
-    {
-        $error_message = 'DB error [' . $errorInfo[0] . ', ' . $errorInfo[1] . ']: ' . $errorInfo[2];
-        throw new Exception($error_message);
-    }
-
-    protected static function formatDateTime(\DateTime $date)
-    {
-        return $date->format('Y-m-d H:i:s');
-    }
-
-    protected static function formatBoolean($bool)
-    {
-        return $bool ? 1 : 0;
     }
 }
