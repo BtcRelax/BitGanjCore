@@ -1,9 +1,7 @@
 <?php
 namespace BtcRelax;
 
-use PDO;
-
-final class Session extends \BtcRelax\Base
+final class Session 
 {
     const STATUS_NOT_INIT = "NOT_INITIALIZED";
     const STATUS_UNAUTH = "UNAUTHENTICATED";
@@ -14,21 +12,15 @@ final class Session extends \BtcRelax\Base
     const STATUS_BANNED = "BANNED";
     
 
-    public $VARS = array();
+    public $VARS = [];
     private $sessionId;
     private $dao;
     private $config = [];
     private $sid_name = '';
     private $sessionIp = '';
     
-    public static function getIstance(): \BtcRelax\Session
-    {
-        return parent::Instantiate(__CLASS__);
-    }
 
-
-    protected  function init ()
-    {
+    function __construct() {
         $this->config = \BtcRelax\Core::getIstance()->getConfig("session");
         $pdo = \BtcRelax\dao\BaseDao::prepareConnection($this->config['DB_NAME'], $this->config['DB_HOST'],$this->config['DB_USER'],$this->config['DB_PASS']); 
         $this->dao = new  \BtcRelax\dao\SessionsDao($pdo);
@@ -40,7 +32,7 @@ final class Session extends \BtcRelax\Base
             array(&$this, 'write'),
             array(&$this, 'destroy'),
             array(&$this, 'gc')
-        );
+        );        
     }
 
     public static function isSessionStarted():bool
@@ -61,9 +53,9 @@ final class Session extends \BtcRelax\Base
      * @param string $name Variable name
      * @return object Store variable
      */
-    public function getVar($nome)
+    public function getVar($varName)
     {
-        return $this->VARS[$nome];
+        return $this->VARS[$varName];
     }
 
     /**
@@ -75,18 +67,6 @@ final class Session extends \BtcRelax\Base
     {
         return $this->VARS;
     }
-
-    /**
-     * Get the session id
-     *
-     * @access public
-     * @return string SessionId
-     */
-    public function getSessionId()
-    {
-        return $this->sessionId;
-    }
-
  
     /**
      * Save a variable into the session
@@ -187,12 +167,6 @@ final class Session extends \BtcRelax\Base
         }
     }
 
-
-
- 
-
-    
-
     /**
      * Check if the session id found is able ti be used
      *
@@ -221,19 +195,6 @@ final class Session extends \BtcRelax\Base
         $this->SQLStatement_InsertSession->bindParam(':ua', $vUA, \PDO::PARAM_STR, $vUaLen);
         $this->SQLStatement_InsertSession->bindParam(':netinfo', $this->getSessionIp(), \PDO::PARAM_STR, 45);
         return $this->SQLStatement_InsertSession->execute();
-    }
-
-    /**
-     * Generate user agent string based on
-     * User Agent and Salt.
-     * The return string is the SHA1 hash.
-     *
-     * @return string
-     */
-    private function getUa()
-    {
-        //return \sha1(\filter_input(\INPUT_SERVER, 'HTTP_USER_AGENT').$this->hijackSalt);
-        return \filter_input(\INPUT_SERVER, 'HTTP_USER_AGENT');
     }
 
 
@@ -466,7 +427,7 @@ final class Session extends \BtcRelax\Base
                 //setcookie (SIDNAME, $this->sessionId,time()+$this->session_duration,"/",'',false,true);
             } else {
                 $this->destroySession(false);
-                trigger_error("Coockie has session id but UA changed!", E_USER_ERROR);
+               trigger_error( "Coockie has session id but UA changed!", E_USER_ERROR);
             }
         } else {
             trigger_error("Coockie has not session id.", E_USER_ERROR);

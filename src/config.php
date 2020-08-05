@@ -7,18 +7,12 @@ use Exception;
 /**
  * Application configuration.
  */
-final class Config extends \BtcRelax\Base
+final class Config 
 {
 
     /** @var array config data */
     private $DATA = null;
 
-    public static function getIstance(): \BtcRelax\Config
-    {
-        return parent::Instantiate(__CLASS__);
-    }
-    
-    
     /**
      * @return array
      * @throws Exception
@@ -31,16 +25,16 @@ final class Config extends \BtcRelax\Base
             }
         return $this->DATA[$section];
     }
-        
-    protected function init()
-    {
+    
+    function __construct() {
         $cfgfile = \filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT') . '/config/config.ini';
         if (!file_exists($cfgfile)) {
             $errmsg =  \sprintf('Config file:%s does not exists!',$cfgfile);
             \BtcRelax\Logger::general($errmsg, \BtcRelax\Logger::FATAL);
         } else {
             $this->DATA = \parse_ini_file($cfgfile, true);
-        }
+        }        
     }
+
         
 }

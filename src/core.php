@@ -86,7 +86,6 @@ final class Core extends \BtcRelax\Base
     private $config;
     private $request;
     private $session;
-    private $dao;
     
  
     
@@ -131,16 +130,9 @@ final class Core extends \BtcRelax\Base
     {
         \spl_autoload_register([$this, 'loadClass']);
         \set_exception_handler([$this, 'handleException']);
-        $this->config = \BtcRelax\Config::getIstance();
-        $this->dao = new \BtcRelax\Dao\BaseDao();     
-    }
-
-    public function startSession()
-    {
-        $this->current_session = \BtcRelax\Session::getIstance();
-        return $this->current_session->startSession();
-    }
-     
+        $this->config = new \BtcRelax\Config();
+        $this->session = new \BtcRelax\Session();
+    }   
     
     public static function createApiClient(): \BtcRelax\APIClient
     {
@@ -175,11 +167,7 @@ final class Core extends \BtcRelax\Base
         
     public function getCurrentSession(): \BtcRelax\Session
     {
-        if ($this->current_session instanceof \BtcRelax\Session) {
-            return $this->current_session;
-        } else {
-            \BtcRelax\Logger::general("Incorrect session instance inside core!", \BtcRelax\Logger::FATAL);
-        }
+        return $this->session;
     }
             
     public function getDefaultPage()
