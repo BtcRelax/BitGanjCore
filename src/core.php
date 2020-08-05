@@ -72,7 +72,7 @@ final class Core extends \BtcRelax\Base
         'BtcRelax\BitID' => '/BitID.php',
         'BtcRelax\Layout\header' => '/layout/header.php',
         'Geary' => '/external/Geary.php',
-        'BtcRelax\Log' => '/logger.php',
+        'BtcRelax\Logger' => '/logger.php',
         'QRcode' => '/classes/QRcode.php',
         'BtcRelax\HD' => '/HD.php',
         'BtcRelax\APIClient' => '/APIClient.php',
@@ -86,6 +86,7 @@ final class Core extends \BtcRelax\Base
     private $config;
     private $request;
     private $session;
+    private $dao;
     
  
     
@@ -121,24 +122,17 @@ final class Core extends \BtcRelax\Base
         return self::$request;
     }
     
-    public static function getVersion():array
+    public function getConfig(string $ConfigName):array
     {
-        $vCurrentDateTime = new \DateTime();
-        $vDAO = new \BtcRelax\DAO();
-        $param = $vDAO->now();
-        $param["Core"] = self::VER;
-        $param["DBSession"] = \BtcRelax\DbSession::getVersion();
-        $param["ServerTime"] =  date_format($vCurrentDateTime, "Y-m-d H:i:s");
-        $param["PHP"] = phpversion();
-        $param["InstanceId"] = \filter_input(\INPUT_SERVER, "SERVER_NAME");
-        return $param;
+        return  $this->config->getConfig($ConfigName);
     }
 
     protected function init()
     {
         \spl_autoload_register([$this, 'loadClass']);
         \set_exception_handler([$this, 'handleException']);
-        $this->config = \BtcRelax\Config::getIstance();     
+        $this->config = \BtcRelax\Config::getIstance();
+        $this->dao = new \BtcRelax\Dao\BaseDao();     
     }
 
     public function startSession()
@@ -184,7 +178,7 @@ final class Core extends \BtcRelax\Base
         if ($this->current_session instanceof \BtcRelax\Session) {
             return $this->current_session;
         } else {
-            \BtcRelax\Log::general("Incorrect session instance inside core!", \BtcRelax\Log::FATAL);
+            \BtcRelax\Logger::general("Incorrect session instance inside core!", \BtcRelax\Logger::FATAL);
         }
     }
             
@@ -228,7 +222,7 @@ final class Core extends \BtcRelax\Base
     
     public function handleException($ex)
     {
-        \BtcRelax\Log::general($ex, \BtcRelax\Log::ERROR);
+        \BtcRelax\Logger::general($ex, \BtcRelax\Logger::ERROR);
         switch ($ex) {
                     case $ex instanceof NotFoundException:
             \header('HTTP/1.0 404 Not Found');
@@ -250,7 +244,7 @@ final class Core extends \BtcRelax\Base
         if (\class_exists($name)) {
             return true;
         }
-        \BtcRelax\Log::general(\sprintf("Loading class: %s", $name), \BtcRelax\Log::DEBUG);
+        \BtcRelax\Logger::general(\sprintf("Loading class: %s", $name), \BtcRelax\Logger::DEBUG);
         if (array_key_exists($name, self::$CLASSES)) {
             require_once __DIR__ . self::$CLASSES[$name];
         } else {
@@ -276,11 +270,11 @@ final class Core extends \BtcRelax\Base
     private function checkPage(string  $page)
     {
         if (!preg_match('/^[a-z0-9-]+$/i', $page)) {
-            Log::general(\sprintf("Try to request unsafe page:", $page), Log::WARN);
+            \BtcRelax\Logger::general(\sprintf("Try to request unsafe page:", $page), \BtcRelax\Logger::WARN);
             throw new \BtcRelax\Exception\NotFoundException('Unsafe page "' . $page . '" requested');
         }
         if (!$this->hasScript($page) && !$this->hasTemplate($page)) {
-            Log::general(\sprintf("Try to request not existent page:", $page), Log::WARN);
+            \BtcRelax\Logger::general(\sprintf("Try to request not existent page:", $page), \BtcRelax\Logger::WARN);
             throw new \BtcRelax\Exception\NotFoundException('Page "' . $page . '" not found');
         }
         return $page;
@@ -289,19 +283,19 @@ final class Core extends \BtcRelax\Base
     private function runPage(string $page = null )
     {
         if (empty($page)) { $page = $this->GetDefaultPage();  };
-        \BtcRelax\Log::general(\sprintf('Try to load page:%s called with method:%s', $page, \BtcRelax\Utils::getRequestMethod()), \BtcRelax\Log::INFO);
+        \BtcRelax\Logger::general(\sprintf('Try to load page:%s called with method:%s', $page, \BtcRelax\Utils::getRequestMethod()), \BtcRelax\Logger::INFO);
         $run = false;
         if ($this->hasScript($page)) {
             $run = true;
             $script = $this->getScript($page);
-            \BtcRelax\Log::general(\sprintf('Loading script:%s', $script), \BtcRelax\Log::INFO);
+            \BtcRelax\Logger::general(\sprintf('Loading script:%s', $script), \BtcRelax\Logger::INFO);
             require $script;
         }
         if ($this->hasTemplate($page)) {
             $run = true;
             //header(\sprintf('page:%s',$page));
             // data for main template
-            \BtcRelax\Log::general(\sprintf('Loading template for page:%s', $page), \BtcRelax\Log::INFO);
+            \BtcRelax\Logger::general(\sprintf('Loading template for page:%s', $page), \BtcRelax\Logger::INFO);
             $template = $this->getTemplate($page);
             //			$flashes = null;
             //			if (Flash::hasFlashes()) {

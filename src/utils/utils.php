@@ -53,6 +53,11 @@ final class Utils
         return \json_encode($data);
     }
 
+    public static function formatBoolean(bool $bool):int
+    {
+        return $bool ? 1 : 0;
+    }
+    
     public static function formatDate(\DateTime $date = null)
     {
         return $date->format('Y-m-d');

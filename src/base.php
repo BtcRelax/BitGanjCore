@@ -15,5 +15,10 @@ abstract class Base
         return self::$instance;
     }
 
+    private function __clone()
+    {
+        trigger_error("Clonig not allowed");
+    }
+    
     abstract protected function init(); 
 }
