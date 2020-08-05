@@ -6,11 +6,10 @@ abstract class Base
     private static $instance;
 
         
-    protected static function getIstance()
+    protected static function Instantiate($class_name)
     {
         if (!isset(self::$instance)) {
-            $c = __CLASS__;
-            self::$instance = new $c;
+            self::$instance = new $class_name;
             self::$instance->init();
         }
         return self::$instance;

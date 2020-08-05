@@ -113,7 +113,7 @@ final class Core extends \BtcRelax\Base
         
     public static function getIstance(): \BtcRelax\Core
     {
-        return parent::getIstance();
+        return parent::Instantiate(__CLASS__);
     }
         
     public static function getRequest():\BtcRelax\Request
