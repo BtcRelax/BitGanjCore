@@ -466,7 +466,7 @@ final class Session extends \BtcRelax\Base
                 //setcookie (SIDNAME, $this->sessionId,time()+$this->session_duration,"/",'',false,true);
             } else {
                 $this->destroySession(false);
-                trigger_error("Coockie has session id but UA changed!", E_USER_ERROR);
+                "Coockie has session id but UA changed!", E_USER_ERROR);
             }
         } else {
             trigger_error("Coockie has not session id.", E_USER_ERROR);
