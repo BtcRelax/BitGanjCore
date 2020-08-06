@@ -22,7 +22,7 @@ final class Session
 
     function __construct() {
         $this->config = \BtcRelax\Core::getIstance()->getConfig("session");
-        $pdo = \BtcRelax\dao\BaseDao::prepareConnection($this->config['DB_NAME'], $this->config['DB_HOST'],$this->config['DB_USER'],$this->config['DB_PASS']); 
+        $pdo = \BtcRelax\dao\BaseDao::prepareConnection($this->config['DB_HOST'],$this->config['DB_NAME'],$this->config['DB_USER'],$this->config['DB_PASS']); 
         $this->dao = new  \BtcRelax\dao\SessionsDao($pdo);
         // register the new handler
         session_set_save_handler(
