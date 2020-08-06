@@ -22,7 +22,7 @@ class BaseDao
 
     public static function prepareConnection(string $db_host, string $db_name, string $db_user, string $db_pass):PDO
     {
-        return new \PDO("mysql:dbname=" . $db_name  . ";host=" . $db_host , $db_user, $db_pass, 
+        return new \PDO(\sprintf("mysql:dbname=%s;host=%s", $db_name, $db_host) , $db_user, $db_pass, 
         array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8; SET time_zone='+03:00';"));        
     }
 
