@@ -12,82 +12,12 @@ final class Core extends \BtcRelax\Base
     private static $CLASSES = [
         'BtcRelax\Config' => '/config.php',
         'BtcRelax\Session' => '/session.php',
-        'BtcRelax\Flash' => '/flash/flash.php',
-        'BtcRelax\Exception\NotFoundException' => '/exception/NotFoundException.php',
-        'BtcRelax\Exception\SessionException' => '/exception/SessionException.php',
-        'BtcRelax\Exception\AuthentificationCritical' => '/exception/AuthExceptions.php',
-        'BtcRelax\Exception\AccessDeniedException' => '/exception/AccessException.php',
-        'BtcRelax\Exception\AssignBookmarkException' => '/exception/AssignBookmarkException.php',
-        'BtcRelax\Dao\BaseDao' => '/dao/BaseDao.php',
-        'BtcRelax\DAO' => '/dao/DAO.php',
-        'BtcRelax\Dao\BookmarkDao' => '/dao/BookmarkDao.php',
-        'BtcRelax\Dao\BookmarkSearchCriteria' => '/dao/BookmarkSearchCriteria.php',
-        'BtcRelax\Dao\OrderDao' => '/dao/OrderDao.php',
-        'BtcRelax\Dao\OrderSearchCriteria' => '/dao/OrderSearchCriteria.php',
-        'BtcRelax\Dao\CustomerDao' => '/dao/CustomerDao.php',
-        'BtcRelax\Dao\CustomerRightsDao' => '/dao/CustomerRightsDao.php',
-        'BtcRelax\Dao\CustomerPropertyDao' => '/dao/CustomerPropertyDao.php',
-        'BtcRelax\Dao\CustomerSearchCriteria' => '/dao/CustomerSearchCriteria.php',
-        'BtcRelax\Dao\IdentifierDao' => '/dao/IdentifierDao.php',
-        'BtcRelax\Dao\IdentifierSearchCriteria' => '/dao/IdentifierSearchCriteria.php',
-        'BtcRelax\Dao\InvoiceSearchCriteria' => '/dao/InvoiceSearchCriteria.php',
-        'BtcRelax\Dao\InvoiceDao' => '/dao/InvoiceDao.php',
-        'BtcRelax\Dao\SessionsDao' => '/dao/SessionsDao.php',
-        'BtcRelax\Dao\RegionDao' => '/dao/RegionDao.php',
-        'BtcRelax\Dao\ProductDao' => '/dao/ProductDao.php',
-        'BtcRelax\Mapping\BookmarkMapper' => '/mapping/BookmarkMapper.php',
-        'BtcRelax\Mapping\CustomerMapper' => '/mapping/CustomerMapper.php',
-        'BtcRelax\Mapping\CustomerRightMapper' => '/mapping/CustomerRightMapper.php',
-        'BtcRelax\Mapping\CustomerPropertyMapper' => '/mapping/CustomerPropertyMapper.php',
-        'BtcRelax\Mapping\OrderMapper' => '/mapping/OrderMapper.php',
-        'BtcRelax\Mapping\InvoiceMapper' => '/mapping/InvoiceMapper.php',
-        'BtcRelax\Mapping\IdentifierMapper' => '/mapping/IdentifierMapper.php',
-        'BtcRelax\Mapping\ProductMapper' => '/mapping/ProductMapper.php',
-        'BtcRelax\Model\Bookmark' => '/model/bookmark.php',
-        'BtcRelax\Model\Customer' => '/model/customer.php',
-        'BtcRelax\Model\CustomerRight' => '/model/customerRight.php',
-        'BtcRelax\Model\CustomerProperty' => '/model/customerProperty.php',
-        'BtcRelax\Model\Order' => '/model/order.php',
-        'BtcRelax\Model\Invoice' => '/model/invoice.php',
-        'BtcRelax\Model\Identicator' => '/model/identicator.php',
-        'BtcRelax\Model\PaymentProvider' => '/model/paymentProvider.php',
-        'BtcRelax\Model\PaymentProviderEPU' => '/model/PaymentProviderEPU.php',
-        'BtcRelax\Model\PaymentProviderBTC' => '/model/PaymentProviderBTC.php',
-        'BtcRelax\Model\PaymentProviderBCH' => '/model/PaymentProviderBCH.php',
-        'BtcRelax\Model\PaymentProviderKRB' => '/model/PaymentProviderKRB.php',
-        'BtcRelax\Model\PaymentProviderXMR' => '/model/PaymentProviderXMR.php',
-        'BtcRelax\Model\PaymentProviderKSM' => '/model/PaymentProviderKSM.php',
-        'BtcRelax\Model\PaymentProviderMAN' => '/model/PaymentProviderMAN.php',
-        'BtcRelax\Model\IdentTelegram' => '/model/identTelegram.php',
-        'BtcRelax\Model\IdentEMail' => '/model/identEMail.php',
-        'BtcRelax\Model\IdentBitId' => '/model/identBitId.php',
-        'BtcRelax\Model\User' => '/model/user.php',
-        'BtcRelax\Model\Region' => '/model/region.php',
-        'BtcRelax\Model\Product' => '/model/product.php',
-        'BtcRelax\Validation\BookmarkValidator' => '/validation/BookmarkValidator.php',
-        'BtcRelax\Validation\CustomerValidator' => '/validation/CustomerValidator.php',
-        'BtcRelax\Validation\OrderValidator' => '/validation/OrderValidator.php',
-        'BtcRelax\Validation\ValidationError' => '/validation/ValidationError.php',
-        'BtcRelax\Utils' => '/utils/utils.php',
-        'BtcRelax\BitID' => '/BitID.php',
-        'BtcRelax\Layout\header' => '/layout/header.php',
-        'Geary' => '/external/Geary.php',
         'BtcRelax\Logger' => '/logger.php',
-        'QRcode' => '/classes/QRcode.php',
-        'BtcRelax\HD' => '/HD.php',
-        'BtcRelax\APIClient' => '/APIClient.php',
-        'BtcRelax\DbSession' => '/classes/DbSession.php'
     ];
-    
 
-    private static $instance;
     private static $events = array();
-
     private $config;
-    private $request;
     private $session;
-    
- 
     
     public static function bindEvent($event, $callback, $obj = null)
     {
@@ -115,12 +45,7 @@ final class Core extends \BtcRelax\Base
     {
         return parent::Instantiate(__CLASS__);
     }
-        
-    public static function getRequest():\BtcRelax\Request
-    {
-        return self::$request;
-    }
-    
+           
     public function getConfig(string $ConfigName):array
     {
         return  $this->config->getConfig($ConfigName);

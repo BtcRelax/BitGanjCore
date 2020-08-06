@@ -19,7 +19,7 @@ final class Config
      */
     public function getConfig(string $section):array
     {
-        if (!\property_exists($section, $this->DATA)) {
+        if (!\array_key_exists($section, $this->DATA)) {
                 $errmsg = \sprintf('Unknown config section: %s', $section);
                 \BtcRelax\Logger::general($errmsg, \BtcRelax\Logger::FATAL);
             }
