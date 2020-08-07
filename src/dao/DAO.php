@@ -153,12 +153,5 @@ class DAO extends Dao\BaseDao
         return false;
     }
         
-    /**
-     * Return MySQL server time
-     */
-    public function now()
-    {
-        $result = parent::query("SELECT now() as 'DBTime'")->fetch();
-        return $result;
-    }
+
 }

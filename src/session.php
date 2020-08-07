@@ -12,134 +12,118 @@ final class Session
     const STATUS_BANNED = "BANNED";
     
 
-    public $VARS = [];
     private $sessionId;
     private $dao;
     private $config = [];
     private $sid_name = '';
     private $sessionIp = '';
-    
+    private $vars = [];
 
     function __construct() {
         $this->config = \BtcRelax\Core::getIstance()->getConfig("session");
         $pdo = \BtcRelax\dao\BaseDao::prepareConnection($this->config['DB_HOST'],$this->config['DB_NAME'],$this->config['DB_USER'],$this->config['DB_PASS']); 
         $this->dao = new  \BtcRelax\dao\SessionsDao($pdo);
         // register the new handler
-        session_set_save_handler(
-            array(&$this, 'open'),
-            array(&$this, 'close'),
-            array(&$this, 'read'),
-            array(&$this, 'write'),
-            array(&$this, 'destroy'),
-            array(&$this, 'gc')
+        session_set_save_handler(  
+        array($this, "_open"),  
+        array($this, "_close"),  
+        array($this, "_read"),  
+        array($this, "_write"),  
+        array($this, "_destroy"),  
+        array($this, "_gc")  
         );        
     }
-
-    public static function isSessionStarted():bool
-    {
-        if (php_sapi_name() !== 'cli') {
-            if (version_compare(phpversion(), '5.4.0', '>=')) {
-                return session_status() === PHP_SESSION_ACTIVE ? true : false;
-            } else {
-                return session_id() === '' ? false : true;
-            }
+     
+    public function _open() {
+        if ($this->dao) {
+            return true;
         }
         return false;
     }
 
-    /**
-     * Get a stored var
-     *
-     * @param string $name Variable name
-     * @return object Store variable
-     */
-    public function getVar($varName)
+    public function _close()
     {
-        return $this->VARS[$varName];
+        return $this->dao->getDb()->close();
     }
 
-    /**
-     * Get all stored vars
-     *
-     * @return object All stored vars
-     */
-    public function getVars()
+    public function _read($sid)
     {
-        return $this->VARS;
-    }
- 
-    /**
-     * Save a variable into the session
-     *
-     * @access public
-     *
-     * @param string $nome The name of the session variable
-     * @param string $valore The value of the session variable.
-     */
-    public function save($nome, $valore)
-    {
-        $this->finalizeSaving($nome, $valore);
+        return (string) $this->serializePhpSession($this->getVars());
     }
 
-    /**
-     * Register a variable into the session
-     *
-     * @access public
-     *
-     * @param object $nome The variable to save. This variable is saved into the
-     *                     session array with the name of the saved variable
-     *
-     * @example $myVars = "fooo";<br>
-     *          $this->register($myVars);<br>
-     *          <br>
-     *          The vars array will be: $this->VARS["myVars"] = "fooo";
-     */
-    public function register(&$nome)
+    public function _write($sid, $session_data)
     {
-        $this->finalizeSaving($this->varName($nome), $nome);
+        //$myData = $this->unserializePhpSession(base64_decode($session_data));
+        $session_data_prepared = \preg_replace_callback('!s:(\d+):"(.*?)";!', function ($m) {
+            return 's:'. \strlen($m[2]).':"'.$m[2].'";';
+        }, $session_data);
+        $myData = $this->unserializePhpSession($session_data_prepared);
+        foreach ($myData as $name => $value) {
+            $this->save($name, $value);
+        }
+        return true;
     }
 
-    /**
+    public function _destroy($sid)
+    {
+        return $this->dao->deleteSessionById($sid);
+    }
+
+    public function _gc($max)
+    {
+//        return $this->dbo->;
+    }
+    
+    
+    /// Internal functions 
+    
+    private function save($name, $value)
+    {
+        $this->finalizeSaving($name, $value);
+    }
+    
+        /**
      * Execute the real saving procedure, insert or update the session value
      *
      * @access private
      * @param string $finalName The name of the variable
      * @param string $finalValue The value of the saved variable
      */
-    private function finalizeSaving($finalName, $finalValue)
+    private function finalizeSaving($name, $value)
     {
-        $finalValue = serialize($finalValue);
-
-        //$this->del($finalName);
+        $data = serialize($value);
+        $this->dao->deleteBySid($name);
         //$this->insert($finalName, $finalValue);
 
         $this->loadSesionVars();
     }
+    
+    /// Static functions
+    
+    public static function isSessionStarted():bool
+    {
+        if (php_sapi_name() !== 'cli') {
+              return session_status() === PHP_SESSION_ACTIVE ? true : false;
+        }
+        return false;
+    }
 
-    /**
-     * Delete a variable from the session
-     *
-     * @access public
-     *
-     * @param string $nome Variable name
-     */
-    public function delete($nome)
+    public function getVar($varName)
+    {
+        return $this->vars[$varName];
+    }
+
+    public function getVars()
+    {
+        return $this->VARS;
+    }
+
+    public function delete($name)
     {
         //$this->del($nome);
         $this->loadSesionVars();
     }
 
-
-    /* PRIVATE METHOD */
-
-
-    /**
-     * Check if session must expire due to "MAX_DURATA"
-     *
-     * @access private
-
-     * @return boolean: true if session must expire | false if session can continue
-     */
     private function expiredSession()
     {
         if (time()>$this->forcedExpire) {
@@ -199,17 +183,6 @@ final class Session
 
 
     
-    /**
-     * Setting up random seed random generator
-     *
-     * @access private
-     * @return float
-     */
-    private function makeSeed()
-    {
-        list($usec, $sec) = explode(' ', microtime());
-        return (float) $sec + ((float) $usec * 100000);
-    }
 
 
     /**
@@ -232,24 +205,14 @@ final class Session
     }
 
 
-    /**
-     * Destroy session
-     * Delete variable from database and free resources
-     *
-     * @access private
-     * @param boolean $sql True if delete both resource and database rows. False to keep database rows
-     * @return boolen true if all is ok, false elsewhere
-     */
-    private function destroySession($sql)
+     private function destroySession($sql)
     {
-        $check = true;
 
-        if ($sql) {
             $this->SQLStatement_DeleteSession->bindParam('sid', $this->sessionId, \PDO::PARAM_STR, $this->sid_len);
             if ($this->SQLStatement_DeleteSession->execute() === false) {
                 $check = false;
             }
-        }
+        
 
         if (setcookie('SIDNAME', $this->sessionId, time() - 3600, "/", '', false, true) === false) {
             $check = false;
@@ -262,63 +225,7 @@ final class Session
         return $check;
     }
 
-    /**
-     * Setting up the class, reading
-     * an existing session, check if a session
-     * is expired.
-
-    
-    
-
-    //--------------------OVERWRITED FUNCTION
-
-    /**
-     *  Our open() function
-     *
-     *  @access private
-     */
-    public function open($save_path, $session_name)
-    {
-        return true;
-    }
-
-    /**
-     *  Our close() function
-     *
-     *  @access private
-     */
-    public function close()
-    {
-        return true;
-    }
-
-    /**
-     *  Our read() function
-     *
-     *  @access private
-     */
-    public function read($session_id)
-    {
-        return (string) $this->serializePhpSession($this->getVars());
-    }
-
-    /**
-     *  Our write() function
-     *
-     *  @access private
-     */
-    public function write($session_id, $session_data)
-    {
-        //$myData = $this->unserializePhpSession(base64_decode($session_data));
-        $session_data_prepared = \preg_replace_callback('!s:(\d+):"(.*?)";!', function ($m) {
-            return 's:'. \strlen($m[2]).':"'.$m[2].'";';
-        }, $session_data);
-        $myData = $this->unserializePhpSession($session_data_prepared);
-        foreach ($myData as $name => $value) {
-            $this->save($name, $value);
-        }
-        return true;
-    }
+  
 
     /**
      * Helper function that serialize an object to a string
@@ -328,14 +235,12 @@ final class Session
      * @return string serialied object
      * @access private
      */
-    private function serializePhpSession($data)
+    private function serializePhpSession($data):string
     {
         $serialized = '';
-
         foreach ($this->getVars() as $key => $value) {
             $serialized .= $key . "|" . serialize($value);
         }
-
         return (string) $serialized;
     }
 
@@ -376,32 +281,7 @@ final class Session
         return $returnArray;
     }
 
-    /**
-     *  Our destroy() function
-     *
-     *  @access private
-     */
-    public function destroy($session_id)
-    {
-        return $this->destroySession(true);
-    }
 
-    /**
-     *  Our gc() function (garbage collector)
-     *
-     *  @access private
-     */
-    public function gc()
-    {
-        \BtcRelax\Logger::general("Garbage collector working", \BtcRelax\Logger::INFO);
-        $time = time() - $this->session_max_duration;
-        $this->SQLStatement_DeleteExpiredSession->bindParam('time', $time, \PDO::PARAM_INT);
-        if ($this->SQLStatement_DeleteExpiredSession->execute()===false) {
-            trigger_error("Somenthing goes wrong with the garbace collector", E_USER_ERROR);
-        } else {
-            return true;
-        }
-    }
 
 
     
@@ -477,45 +357,6 @@ final class Session
         }
     }
    
-    public static function getSessionLifetime():int
-    {
-        return self::SessionCheck()? $_SESSION['last_active'] - $_SESSION['start_time'] : 0 ;
-    }
-    
-    private static function SessionCheck()
-    {
-        $result = \BtcRelax\Session::isSessionStarted();
-        if (($result) && isset($_SESSION['last_active'])) {
-            if (time() < ($_SESSION['last_active'] + intval(SESS_DURATION))) {
-                $result = true;
-            } else {
-                $result = false;
-                //throw new SessionException(\sprintf("Session id:%s was expired!",\session_id()));
-            }
-        }
-        return $result;
-    }
-
-
-
-    public static function clearValue($session)
-    {
-        self::delete($session);
-        unset($_SESSION[$session]);
-        \BtcRelax\Logger::general(\sprintf("Session id:%s cleared key:%s", session_id(), $session), \BtcRelax\Logger::DEBUG);
-        return true;
-    }
-
-    public static function killSession()
-    {
-        $_SESSION = array();
-        if (isset($_COOKIE)):
-                \setcookie(session_name(), '', time() - 7000000, '/');
-        endif;
-        \session_destroy();
-        return;
-    }
-
     public static function allStatuses()
     {
         return [
