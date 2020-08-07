@@ -10,7 +10,7 @@ use DateTime;
 
 final class ProductDao extends BaseDao
 {
-    public function insert(Product $newProduct)
+    public function insert(\BtcRelax\Model\Product $newProduct)
     {
         $sql = "INSERT INTO `Products` (`ProductTitle`,`InfoURL`) VALUES ( :ProductTitle, :InfoURL )";
         return $this->execute($sql, $newProduct);
@@ -20,7 +20,7 @@ final class ProductDao extends BaseDao
     {
         $sql = 'UPDATE `Products` SET `ProductTitle` = :ProductTitle,
                    `InfoURL` = :InfoURL  WHERE `idProduct` = :idProduct;';
-        return $this->execute($sql, $pInvoice);
+        return $this->execute($sql, $pProduct);
     }
     
     public function save(Product $pProduct)

@@ -3,12 +3,10 @@
 namespace BtcRelax\Dao;
 
 use \PDO;
-use \Exception;
 
 class BaseDao
 {
     protected $db = null;
-    protected $autocommit = true;
 
     public function __destruct()
     {
@@ -32,7 +30,7 @@ class BaseDao
         $this->db->setAttribute(\PDO::ATTR_AUTOCOMMIT, \BtcRelax\Utils::formatBoolean($isAutocommit) );
     }
 
-    public function getAutocommit()
+    public function getAutocommit():bool
     {
         return $this->db->getAttribute(\PDO::ATTR_AUTOCOMMIT);
     }
@@ -43,7 +41,7 @@ class BaseDao
         return $this->db;
     }
 
-    public function addToFilter($filter, $newWhere)
+    public function addToFilter($filter, $newWhere):string
     {
         if (empty($filter)) {
             return \sprintf('WHERE %s', $newWhere);
@@ -77,6 +75,17 @@ class BaseDao
         return $statement;
     }
 
+    /**
+    * Return MySQL server time
+    */
+    
+    public function now()
+    {
+        $result = $this->query("SELECT now() as 'DBTime'")->fetch();
+        return $result;
+    }
+    
+    
     public function get_numeric($val):int
     {
         if (is_numeric($val)) {

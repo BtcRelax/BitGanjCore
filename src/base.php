@@ -3,7 +3,7 @@ namespace BtcRelax;
 
 abstract class Base 
 {
-    private static $instance;
+    protected static $instance;
 
         
     protected static function Instantiate($class_name)
