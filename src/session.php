@@ -20,9 +20,10 @@ final class Session
     private $vars = [];
 
     function __construct() {
-        $this->config = \BtcRelax\Core::getIstance()->getConfig("session");
+        $this->config = \BtcRelax\Core::getInstance()->getConfig("session");
         $pdo = \BtcRelax\dao\BaseDao::prepareConnection($this->config['DB_HOST'],$this->config['DB_NAME'],$this->config['DB_USER'],$this->config['DB_PASS']); 
         $this->dao = new  \BtcRelax\dao\SessionsDao($pdo);
+        $this->sid_name = $this->config['SIDNAME']??"JAHSID";
         // register the new handler
         session_set_save_handler(  
         array($this, "_open"),  
@@ -41,18 +42,15 @@ final class Session
         return false;
     }
 
-    public function _close()
-    {
+    public function _close() {
         return $this->dao->getDb()->close();
     }
 
-    public function _read($sid)
-    {
+    public function _read($sid)  {
         return (string) $this->serializePhpSession($this->getVars());
     }
 
-    public function _write($sid, $session_data)
-    {
+    public function _write($sid, $session_data)  {
         //$myData = $this->unserializePhpSession(base64_decode($session_data));
         $session_data_prepared = \preg_replace_callback('!s:(\d+):"(.*?)";!', function ($m) {
             return 's:'. \strlen($m[2]).':"'.$m[2].'";';
@@ -64,10 +62,7 @@ final class Session
         return true;
     }
 
-    public function _destroy($sid)
-    {
-        return $this->dao->deleteSessionById($sid);
-    }
+    public function _destroy($sid) {  return $this->dao->deleteSessionById($sid); }
 
     public function _gc($max)
     {
@@ -82,13 +77,6 @@ final class Session
         $this->finalizeSaving($name, $value);
     }
     
-        /**
-     * Execute the real saving procedure, insert or update the session value
-     *
-     * @access private
-     * @param string $finalName The name of the variable
-     * @param string $finalValue The value of the saved variable
-     */
     private function finalizeSaving($name, $value)
     {
         $data = serialize($value);
@@ -98,27 +86,18 @@ final class Session
         $this->loadSesionVars();
     }
     
-    /// Static functions
     
-    public static function isSessionStarted():bool
-    {
-        if (php_sapi_name() !== 'cli') {
-              return session_status() === PHP_SESSION_ACTIVE ? true : false;
-        }
-        return false;
-    }
-
-    public function getVar($varName)
+    private function getVar($varName)
     {
         return $this->vars[$varName];
     }
 
-    public function getVars()
+    private function getVars()
     {
         return $this->VARS;
     }
 
-    public function delete($name)
+    private function delete($name)
     {
         //$this->del($nome);
         $this->loadSesionVars();
@@ -150,13 +129,6 @@ final class Session
             $this->VARS[$infos["nome"]]=unserialize($infos["valore"]);
         }
     }
-
-    /**
-     * Check if the session id found is able ti be used
-     *
-     * @return boolean True if the session Id is ok, False if not
-     */
-
 
     /**
      * Generate a new unique session id
@@ -294,6 +266,7 @@ final class Session
      */
     protected function readSessionId()
     {
+                
         if (isset($_COOKIE[SIDNAME])) { //there some jam in the cookie
             $this->sessionId=$_COOKIE[SIDNAME];
             //check if the jam can be eated
@@ -313,32 +286,12 @@ final class Session
             trigger_error("Coockie has not session id.", E_USER_ERROR);
         }
     }    
-    
-    public static function getSessionsCount()
-    {
-        $result = 0;
-        if (!empty($this->dbsession)) {
-            $vSessions = $this->dbsession->getGlobalSessionsInfo();
-            $result = count($vSessions);
-        }
-        return $result;
-    }
-
-    public static function getSessionsInfo()
-    {
-        $vSessDao = new SessionsDao();
-        $result = $vSessDao->getSessions(session_id());
-        return $result;
-    }
-        
-    public function startSession()
-    {
+  
+    private function startSession()    {
         if ($this->newSid()) {
             $vSessionId = $this->getSessionId();
             session_id($vSessionId);
             session_start();
-            $_SESSION['start_time'] = time();
-            $_SESSION['last_active'] = time();
             $_SESSION['SessionState'] = SecureSession::STATUS_UNAUTH;
             \setcookie($this->sid_name, $this->sessionId, \time()+$this->session_duration, "/", '', true, false);
             \session_set_cookie_params(SESS_MAX_DURATION);
@@ -348,8 +301,7 @@ final class Session
         return false;
     }
 
-    public static function getSessionState()
-    {
+    public static function getSessionState()   {
         if (session_status() === PHP_SESSION_ACTIVE) {
             return ($_SESSION['SessionState']);
         } else {

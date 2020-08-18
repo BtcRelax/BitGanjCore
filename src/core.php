@@ -1,9 +1,10 @@
-<?php
+<?php  declare(strict_types=1);
 namespace BtcRelax;
 
 use BtcRelax\Exception\NotFoundException;
+use Symfony\Component\HttpFoundation\Request;
 
-final class Core extends \BtcRelax\Base
+final class Core
 {
     const PAGE_DIR = '/page/';
     const LAYOUT_DIR = '/layout/';
@@ -16,9 +17,13 @@ final class Core extends \BtcRelax\Base
     ];
 
     private static $events = array();
-    private $config;
-    private $session;
+    private static ?Core $instance = null;
+    private $request = null;
+    private ?\BtcRelax\Config $config = null;
+    private ?\BtcRelax\Session $session = null;
     
+    /// Static methods
+        
     public static function bindEvent($event, $callback, $obj = null)
     {
         if (!self::$events[$event]) {
@@ -40,25 +45,17 @@ final class Core extends \BtcRelax\Base
             }
         }
     }
-        
-    public static function getIstance(): \BtcRelax\Core
-    {
-        return parent::Instantiate(__CLASS__);
-    }
-           
-    public function getConfig(string $ConfigName):array
-    {
-        return  $this->config->getConfig($ConfigName);
-    }
-
-    protected function init()
-    {
-        \spl_autoload_register([$this, 'loadClass']);
-        \set_exception_handler([$this, 'handleException']);
-        $this->config = new \BtcRelax\Config();
-        $this->session = new \BtcRelax\Session();
-    }   
     
+    public static function getInstance(): \BtcRelax\Core
+    {
+        if (!isset(self::$instance)) {
+            $c = __CLASS__;
+            self::$instance = new $c;
+            self::$instance->init();
+        }
+        return self::$instance;
+    }
+         
     public static function createApiClient(): \BtcRelax\APIClient
     {
         return new APIClient();
@@ -89,13 +86,47 @@ final class Core extends \BtcRelax\Base
         $vAM = self::createAM();
         return $vAM->getUser();
     }
-        
+      
+    // Public
+    public function getConfig(string $ConfigName):array
+    {
+        return  $this->config->getConfig($ConfigName);
+    }
+
     public function getCurrentSession(): \BtcRelax\Session
     {
         return $this->session;
     }
-            
-    public function getDefaultPage()
+
+    // Private methods
+    private function init()
+    {
+        \spl_autoload_register([$this, 'loadClass']);
+        \set_exception_handler([$this, 'handleException']);
+        $this->config = new \BtcRelax\Config();
+        $this->session = new \BtcRelax\Session();
+    }
+    
+    private function __construct()
+    {
+    }
+
+    /**
+     * prevent the instance from being cloned (which would create a second instance of it)
+     */
+    private function __clone()
+    {
+        trigger_error("Clonig not allowed");
+    }
+
+    /**
+     * prevent from being unserialized (which would create a second instance of it)
+     */
+    private function __wakeup()
+    {
+    }
+                
+    private function getDefaultPage()
     {
         switch (\BtcRelax\Session::getSessionState()) {
             case Session::STATUS_GUEST:
@@ -115,9 +146,10 @@ final class Core extends \BtcRelax\Base
         return $result_page;
     }
      
-    public function run()
+    public function run( \Symfony\Component\HttpFoundation\Request $request = null  )
     {
-        if (\property_exists($this->request, "controller")) {
+        $this->request = $request ?? \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+        if (\property_exists($this->request->query->parameters , "controller")) {
         } else {
             header('Cache-Control: no-cache, no-store, must-revalidate');
             header('Pragma: no-cache');
@@ -233,16 +265,7 @@ final class Core extends \BtcRelax\Base
     {
         return  self::PAGE_DIR . $page . '.phtml';
     }
-    
-    private function getHeader()
-    {
-        $vState = \BtcRelax\Session::getSessionState();
-        if (($vState === Session::STATUS_USER) || ($vState === Session::STATUS_ROOT)
-                    || ($vState === Session::STATUS_BANNED)) {
-            return new \BtcRelax\Layout\header();
-        }
-    }
-                
+             
     private function hasScript($page)
     {
         return file_exists($this->getScript($page));
@@ -253,7 +276,7 @@ final class Core extends \BtcRelax\Base
         return file_exists($this->getTemplate($page));
     }
 
-    public function tryToAutoload($f)
+    private function tryToAutoload($f)
     {
         $result = false;
         $base = dirname(__FILE__) . "/";
