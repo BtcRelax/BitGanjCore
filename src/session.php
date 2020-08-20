@@ -1,7 +1,7 @@
 <?php
 namespace BtcRelax;
 
-final class Session 
+final class Session implements \SessionHandlerInterface
 {
     const STATUS_NOT_INIT = "NOT_INITIALIZED";
     const STATUS_UNAUTH = "UNAUTHENTICATED";
@@ -26,83 +26,40 @@ final class Session
         $this->dao = new  \BtcRelax\Dao\SessionsDao($pdo);
         $this->sid_name = $this->config['SIDNAME']??"JAHSID";
         $this->sessionDuration = $this->config['SESS_DURATION']??1800;
-        $this->sessionMaxDuration = $this->config['SESS_MAX_DURATION']??3600;
-        // register the new handler
-        session_set_save_handler(  
-        array($this, "_open"),  
-        array($this, "_close"),  
-        array($this, "_read"),  
-        array($this, "_write"),  
-        array($this, "_destroy"),  
-        array($this, "_gc")  
-        );        
+        $this->sessionMaxDuration = $this->config['SESS_MAX_DURATION']??3600;      
     }
-     
-    public function _open() {
-        if ($this->dao) {
-            return true;
-        }
-        return false;
-    }
-
-    public function _close() {
-        return $this->dao->getDb()->close();
-    }
-
-    public function _read($sid)  {
-        return (string) $this->serializePhpSession($this->getVars());
-    }
-
-    public function _write($sid, $session_data)  {
-        //$myData = $this->unserializePhpSession(base64_decode($session_data));
-        $session_data_prepared = \preg_replace_callback('!s:(\d+):"(.*?)";!', function ($m) {
-            return 's:'. \strlen($m[2]).':"'.$m[2].'";';
-        }, $session_data);
-        $myData = $this->unserializePhpSession($session_data_prepared);
-        foreach ($myData as $name => $value) {
-            $this->save($name, $value);
-        }
-        return true;
-    }
-
-    public function _destroy($sid) {  return $this->dao->deleteSessionById($sid); }
-
-    public function _gc($max)
-    {
-    }
-    
-    function getSessionId() {
+   
+    public function  getSessionId() {
         return $this->sessionId;
     }
 
-    function getSessionDuration(): int {
+    public function getSessionDuration(): int {
         return $this->sessionDuration;
     }
 
-    function getSessionMaxDuration(): int {
+    public function getSessionMaxDuration(): int {
         return $this->sessionMaxDuration;
     }
     
-    function getExpireSession(){
+    public function getExpireSession(){
         return time() + $this->getSessionDuration();
     }
     
-    function getForcedExpireSession(){
+    public function getForcedExpireSession(){
         return time() + $this->getSessionMaxDuration();
     }
     
-    function getUserAgent() {
+    public function getUserAgent() {
         return \BtcRelax\Utils::getUserAgent();
     }
     
-    function getUserIP() {
+    public function getUserIP() {
         return \BtcRelax\Core::getRequest()->getClientIp();
     }
     
-    function getCurrentServer() {
+    public function getCurrentServer() {
         return \BtcRelax\Core::getRequest()->getHttpHost();
     }
-    
     
     /// Internal functions 
     
@@ -120,7 +77,6 @@ final class Session
         $this->loadSesionVars();
     }
     
-    
     private function getVar($varName)
     {
         return $this->vars[$varName];
@@ -128,7 +84,7 @@ final class Session
 
     private function getVars()
     {
-        return $this->VARS;
+        return $this->vars;
     }
 
     private function expiredSession()
@@ -142,11 +98,10 @@ final class Session
 
     private function loadSesionVars()
     {
-        $this->VARS = array();
         $this->updateSessionExpireTime();
-        $dati = $this->selectSessionVars();
-        foreach ($dati as $infos) {
-            $this->VARS[$infos["nome"]]=unserialize($infos["valore"]);
+        $data = $this->selectSessionVars();
+        foreach ($data as $infos) {
+            $this->vars[$infos["name"]]=unserialize($infos["value"]);
         }
     }
 
@@ -183,12 +138,9 @@ final class Session
         if (strlen($data) == 0) {
             return array();
         }
-
         // match all the session keys and offsets
         \preg_match_all('/(^|;|\})([a-zA-Z0-9_]+)\|/i', $data, $matchesarray, PREG_OFFSET_CAPTURE);
-
         $returnArray = array();
-
         $lastOffset = null;
         $currentKey = '';
         foreach ($matchesarray[2] as $value) {
@@ -198,19 +150,15 @@ final class Session
                 $returnArray[$currentKey] = unserialize($valueText);
             }
             $currentKey = $value[0];
-
             $lastOffset = $offset + strlen($currentKey)+1;
         }
-
         $valueText = substr($data, $lastOffset);
         $returnArray[$currentKey] = unserialize($valueText);
-
         return $returnArray;
     }
 
     protected function readSessionId()
-    {
-                
+    {      
         if (isset($_COOKIE[SIDNAME])) { //there some jam in the cookie
             $this->sessionId=$_COOKIE[SIDNAME];
             //check if the jam can be eated
@@ -266,5 +214,36 @@ final class Session
         ];
     }
 
+    public function close(): bool {
+        return $this->dao->getDb()->commit();
+    }
+
+    public function destroy(string $session_id): bool {
+        return $this->dao->deleteSessionById($session_id); 
+    }
+
+    public function gc(int $maxlifetime): int {
+        return $this->dao->deleteExpiredSession(); 
+    }
+
+    public function open(string $save_path, string $session_name): bool {
+        return $this->dao->getDb()->inTransaction() ? true : $this->dao->getDb()->beginTransaction();
+    }
+
+    public function read(string $session_id): string {
+        return (string) $this->serializePhpSession($this->getVars());
+    }
+
+    public function write(string $session_id, string $session_data): bool {
+        //$myData = $this->unserializePhpSession(base64_decode($session_data));
+        $session_data_prepared = \preg_replace_callback('!s:(\d+):"(.*?)";!', function ($m) {
+            return 's:'. \strlen($m[2]).':"'.$m[2].'";';
+        }, $session_data);
+        $myData = $this->unserializePhpSession($session_data_prepared);
+        foreach ($myData as $name => $value) {
+            $this->save($name, $value);
+        }
+        return true; 
+    }
 
 }
