@@ -71,6 +71,14 @@ final class SessionsDao extends BaseDao
         return $statement->execute();
     }
 
+    public function deleteExpiredSession()
+    {
+        $sql = "DELETE FROM Sessions WHERE forced_expires = :forced_expires";
+        $statement = $this->getDb()->prepare($sql);
+        $statement->bindParam('forced_expires', time(), PDO::PARAM_STR);
+        return $statement->execute();
+    }
+    
     
  
 }

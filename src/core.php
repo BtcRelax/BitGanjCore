@@ -106,6 +106,7 @@ final class Core
         \set_exception_handler([$this, 'handleException']);
         $this->config = new \BtcRelax\Config();
         $this->session = new \BtcRelax\Session();
+        \session_set_save_handler($this->session);
     }
     
     private function __construct()
@@ -150,8 +151,8 @@ final class Core
     public function run( \Symfony\Component\HttpFoundation\Request $request = null  )
     {
         $this->request = $request ?? \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-        $this->response = new \Symfony\Component\HttpFoundation\Response();
         if ($this->request->query->has('controller')) {
+            $this->response = new \Symfony\Component\HttpFoundation\Response();
         } else {
             header('Cache-Control: no-cache, no-store, must-revalidate');
             header('Pragma: no-cache');

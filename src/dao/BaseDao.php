@@ -4,9 +4,9 @@ namespace BtcRelax\Dao;
 
 use \PDO;
 
-class BaseDao
+class BaseDao 
 {
-    protected $db = null;
+    protected ?\PDO $db = null;
 
     public function __destruct()
     {
@@ -34,7 +34,6 @@ class BaseDao
     {
         return $this->db->getAttribute(\PDO::ATTR_AUTOCOMMIT);
     }
-
 
     public function getDb():PDO
     {
