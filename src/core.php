@@ -1,4 +1,4 @@
-<?php  declare(strict_types=1);
+<?php  
 namespace BtcRelax;
 
 use BtcRelax\Exception\NotFoundException;
