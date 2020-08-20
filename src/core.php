@@ -106,7 +106,6 @@ final class Core
         \set_exception_handler([$this, 'handleException']);
         $this->config = new \BtcRelax\Config();
         $this->session = new \BtcRelax\Session();
-        \session_set_save_handler($this->session);
     }
     
     private function __construct()
@@ -212,18 +211,18 @@ final class Core
         }
         if ($this->hasTemplate($page)) {
             $template = $this->getTemplate($page);
-            include \filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT') . self::LAYOUT_DIR . 'index.phtml';
+            include __DIR__ . self::LAYOUT_DIR . 'index.phtml';
         }
     }
 
     private function getScript($page)
     {
-       return self::PAGE_DIR . $page . '.php';
+       return __DIR__ . self::PAGE_DIR . $page . '.php';
     }
 
     private function getTemplate($page)
     {
-        return  self::PAGE_DIR . $page . '.phtml';
+        return __DIR__ . self::PAGE_DIR . $page . '.phtml';
     }
              
     private function hasScript($page)

@@ -1,7 +1,7 @@
 <?php
 namespace BtcRelax;
 
-final class Session implements \SessionHandlerInterface
+class Session 
 {
     const STATUS_NOT_INIT = "NOT_INITIALIZED";
     const STATUS_UNAUTH = "UNAUTHENTICATED";
@@ -10,12 +10,11 @@ final class Session implements \SessionHandlerInterface
     const STATUS_USER = "USER";
     const STATUS_ROOT = "ROOT";
     const STATUS_BANNED = "BANNED";
-    
-
+  
     private $sessionId = null;
     private $sessionDuration = 0;
     private $sessionMaxDuration = 0;
-    private \BtcRelax\Dao\SessionDao $dao;
+    private $dao;
     private $config = [];
     private $sid_name = null;
     private $vars = [];
@@ -26,7 +25,15 @@ final class Session implements \SessionHandlerInterface
         $this->dao = new  \BtcRelax\Dao\SessionsDao($pdo);
         $this->sid_name = $this->config['SIDNAME']??"JAHSID";
         $this->sessionDuration = $this->config['SESS_DURATION']??1800;
-        $this->sessionMaxDuration = $this->config['SESS_MAX_DURATION']??3600;      
+        $this->sessionMaxDuration = $this->config['SESS_MAX_DURATION']??3600; 
+        session_set_save_handler(
+		array($this, "open"),
+		array($this, "close"),
+		array($this, "read"),
+		array($this, "write"),
+		array($this, "destroy"),
+		array($this, "gc")
+		);
     }
    
     public function  getSessionId() {
@@ -215,7 +222,14 @@ final class Session implements \SessionHandlerInterface
     }
 
     public function close(): bool {
-        return $this->dao->getDb()->commit();
+		// Close the database connection
+		// If successful
+		if($this->db->close()){
+		// Return True
+		return true;
+		}
+		// Return False
+		return false;
     }
 
     public function destroy(string $session_id): bool {
@@ -227,15 +241,52 @@ final class Session implements \SessionHandlerInterface
     }
 
     public function open(string $save_path, string $session_name): bool {
-        return $this->dao->getDb()->inTransaction() ? true : $this->dao->getDb()->beginTransaction();
+		// If successful
+		if($this->dao->getDb()){
+		// Return True
+		return true;
+		}
+		// Return False
+		return false;
     }
 
     public function read(string $session_id): string {
+//        		// Set query
+//		$this->db->query('SELECT data FROM sessions WHERE id = :id');
+//		// Bind the Id
+//		$this->db->bind(':id', $id);
+//		// Attempt execution
+//		// If successful
+//		if($this->db->execute()){
+//		// Save returned row
+//		$row = $this->db->single();
+//		// Return the data
+//		return $row['data'];
+//		}else{
+//		// Return an empty string
+//		return '';
+//		}
         return (string) $this->serializePhpSession($this->getVars());
     }
 
     public function write(string $session_id, string $session_data): bool {
-        //$myData = $this->unserializePhpSession(base64_decode($session_data));
+//        		// Create time stamp
+//		$access = time();
+//		// Set query  
+//		$this->db->query('REPLACE INTO sessions VALUES (:id, :access, :data)');
+//		// Bind data
+//		$this->db->bind(':id', $id);
+//		$this->db->bind(':access', $access);  
+//		$this->db->bind(':data', $data);
+//		// Attempt Execution
+//		// If successful
+//		if($this->db->execute()){
+//		// Return True
+//		return true;
+//		}
+//		// Return False
+//		return false;
+        
         $session_data_prepared = \preg_replace_callback('!s:(\d+):"(.*?)";!', function ($m) {
             return 's:'. \strlen($m[2]).':"'.$m[2].'";';
         }, $session_data);
