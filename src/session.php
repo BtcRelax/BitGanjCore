@@ -12,18 +12,21 @@ final class Session
     const STATUS_BANNED = "BANNED";
     
 
-    private $sessionId;
-    private $dao;
+    private $sessionId = null;
+    private $sessionDuration = 0;
+    private $sessionMaxDuration = 0;
+    private \BtcRelax\Dao\SessionDao $dao;
     private $config = [];
-    private $sid_name = '';
-    private $sessionIp = '';
+    private $sid_name = null;
     private $vars = [];
 
     function __construct() {
         $this->config = \BtcRelax\Core::getInstance()->getConfig("session");
-        $pdo = \BtcRelax\dao\BaseDao::prepareConnection($this->config['DB_HOST'],$this->config['DB_NAME'],$this->config['DB_USER'],$this->config['DB_PASS']); 
-        $this->dao = new  \BtcRelax\dao\SessionsDao($pdo);
+        $pdo = \BtcRelax\Dao\BaseDao::prepareConnection($this->config['DB_HOST'],$this->config['DB_NAME'],$this->config['DB_USER'],$this->config['DB_PASS']); 
+        $this->dao = new  \BtcRelax\Dao\SessionsDao($pdo);
         $this->sid_name = $this->config['SIDNAME']??"JAHSID";
+        $this->sessionDuration = $this->config['SESS_DURATION']??1800;
+        $this->sessionMaxDuration = $this->config['SESS_MAX_DURATION']??3600;
         // register the new handler
         session_set_save_handler(  
         array($this, "_open"),  
@@ -66,7 +69,38 @@ final class Session
 
     public function _gc($max)
     {
-//        return $this->dbo->;
+    }
+    
+    function getSessionId() {
+        return $this->sessionId;
+    }
+
+    function getSessionDuration(): int {
+        return $this->sessionDuration;
+    }
+
+    function getSessionMaxDuration(): int {
+        return $this->sessionMaxDuration;
+    }
+    
+    function getExpireSession(){
+        return time() + $this->getSessionDuration();
+    }
+    
+    function getForcedExpireSession(){
+        return time() + $this->getSessionMaxDuration();
+    }
+    
+    function getUserAgent() {
+        return \BtcRelax\Utils::getUserAgent();
+    }
+    
+    function getUserIP() {
+        return \BtcRelax\Core::getRequest()->getClientIp();
+    }
+    
+    function getCurrentServer() {
+        return \BtcRelax\Core::getRequest()->getHttpHost();
     }
     
     
@@ -97,12 +131,6 @@ final class Session
         return $this->VARS;
     }
 
-    private function delete($name)
-    {
-        //$this->del($nome);
-        $this->loadSesionVars();
-    }
-
     private function expiredSession()
     {
         if (time()>$this->forcedExpire) {
@@ -112,62 +140,22 @@ final class Session
         }
     }
 
-    /**
-     * Load session vars to the VARS array
-     *
-     * @access private
-     */
     private function loadSesionVars()
     {
         $this->VARS = array();
-
         $this->updateSessionExpireTime();
-
         $dati = $this->selectSessionVars();
-
         foreach ($dati as $infos) {
             $this->VARS[$infos["nome"]]=unserialize($infos["valore"]);
         }
     }
 
-    /**
-     * Generate a new unique session id
-     *
-     * @access protected
-     * @return bool True if session insert, false elsewhere
-     */
-    protected function newSid()
+    private function newSid()
     {
-        $this->sessionId= \BtcRelax\Utils::generateNonce($this->sid_len);
-        $this->forcedExpire = time()+ $this->session_max_duration;
-        $expireTime = time() + $this->session_duration;
-        $vUaLen = 40;
-        $vUA = $this->getUa();
-        $this->setSessionIp();
-                    
-        $this->SQLStatement_InsertSession->bindParam(':expires', $expireTime, \PDO::PARAM_INT);
-        $this->SQLStatement_InsertSession->bindParam(':forcedExpires', $this->forcedExpire, \PDO::PARAM_INT);
-        $this->SQLStatement_InsertSession->bindParam(':sid', $this->sessionId, \PDO::PARAM_STR);
-        $this->SQLStatement_InsertSession->bindParam(':ua', $vUA, \PDO::PARAM_STR, $vUaLen);
-        $this->SQLStatement_InsertSession->bindParam(':netinfo', $this->getSessionIp(), \PDO::PARAM_STR, 45);
-        return $this->SQLStatement_InsertSession->execute();
+        $this->sessionId = \BtcRelax\Utils::generateNonce($this->sid_len);
+        return $this->dao->insertSession($this);
     }
 
-
-    
-
-
-    /**
-     * Retrive the name of a variable, giving the varaible as argument
-     *
-     * @access private
-     * @param mixed type $var The variable
-     * @param boolean $scope The Scope
-     * @return string The variable name
-     *
-     * @example $this->varName($mySuperVariable);<br>
-     *          return: "mySuperVariable"
-     */
     private function varName(&$var, $scope=0)
     {
         $old = $var;
@@ -179,34 +167,8 @@ final class Session
 
      private function destroySession($sql)
     {
-
-            $this->SQLStatement_DeleteSession->bindParam('sid', $this->sessionId, \PDO::PARAM_STR, $this->sid_len);
-            if ($this->SQLStatement_DeleteSession->execute() === false) {
-                $check = false;
-            }
-        
-
-        if (setcookie('SIDNAME', $this->sessionId, time() - 3600, "/", '', false, true) === false) {
-            $check = false;
-        }
-            
-        unset($_REQUEST['SIDNAME']);
-        unset($_POST['SIDNAME']);
-        unset($_GET['SIDNAME']);
-
-        return $check;
     }
 
-  
-
-    /**
-     * Helper function that serialize an object to a string
-     * in the Php session format
-     *
-     * @param mixed object $data Session data (or any object)
-     * @return string serialied object
-     * @access private
-     */
     private function serializePhpSession($data):string
     {
         $serialized = '';
@@ -216,13 +178,6 @@ final class Session
         return (string) $serialized;
     }
 
-    /**
-     * Helper function that unserialize PHP Session Data string
-     *
-     * @param string $data Sessione serialized data
-     * @return object
-     * @access private
-     */
     private function unserializePhpSession($data)
     {
         if (strlen($data) == 0) {
@@ -253,17 +208,6 @@ final class Session
         return $returnArray;
     }
 
-
-
-
-    
-
-    
-   /**
-     * Read actual sessionId or create a new one
-     *
-     * @access private
-     */
     protected function readSessionId()
     {
                 

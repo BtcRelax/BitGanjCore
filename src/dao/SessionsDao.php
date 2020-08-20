@@ -17,12 +17,12 @@ final class SessionsDao extends BaseDao
     {
         $sql = "INSERT INTO Sessions (sid, expires, forced_expires, ua, created, netinfo, server) VALUES ( :sid, :expires, :forced_expires, :ua, :created, :netinfo, :server)";
         $statement = $this->getDb()->prepare($sql);
-        $statement->bindParam('sid', $sid, PDO::PARAM_STR);
-        $statement->bindParam('expires', $expireTime, PDO::PARAM_INT);
-        $statement->bindParam('forcedExpires', $this->forcedExpire, PDO::PARAM_INT);
-        $statement->bindParam('ua',$vUA , PDO::PARAM_STR);
-        $statement->bindParam('netinfo', \BtcRelax\Utils::getIpAddress() , PDO::PARAM_STR);
-        $statement->bindParam('server',$vServer, PDO::PARAM_STR);
+        $statement->bindParam('sid', $session->getSessionId(), PDO::PARAM_STR);
+        $statement->bindParam('expires', $session->getExpireSession(), PDO::PARAM_INT);
+        $statement->bindParam('forcedExpires', $session->getForcedExpireSession(), PDO::PARAM_INT);
+        $statement->bindParam('ua',$session->getUserAgent() , PDO::PARAM_STR);
+        $statement->bindParam('netinfo', $session->getUserIP() , PDO::PARAM_STR);
+        $statement->bindParam('server',$session->getCurrentServer(), PDO::PARAM_STR);
         $vRes = $statement->execute(); 
         return $vRes;        
     }
@@ -40,6 +40,8 @@ final class SessionsDao extends BaseDao
         $statement->bindParam('sid', $sid, PDO::PARAM_STR);
         
     }
+    
+    
     
     public function insertSessionVar(string $sid, string $name, string $value)
     {
@@ -69,5 +71,6 @@ final class SessionsDao extends BaseDao
         return $statement->execute();
     }
 
+    
  
 }

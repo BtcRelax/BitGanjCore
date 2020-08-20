@@ -2,7 +2,6 @@
 namespace BtcRelax;
 
 use BtcRelax\Exception\NotFoundException;
-use Symfony\Component\HttpFoundation\Request;
 
 final class Core
 {
@@ -16,21 +15,19 @@ final class Core
         'BtcRelax\Logger' => '/logger.php',
     ];
 
-    private static $events = array();
-    private static ?Core $instance = null;
-    private \Symfony\Component\HttpFoundation\Request $request = null;
-    private \Symfony\Component\HttpFoundation\Response $response = null;
-    private \BtcRelax\Config $config = null;
-    private \BtcRelax\Session $session = null;
+    private static array $events = [];
+    private static ?\BtcRelax\Core $instance = null;
+    private ?\Symfony\Component\HttpFoundation\Request $request = null;
+    private ?\Symfony\Component\HttpFoundation\Response $response = null;
+    private ?\BtcRelax\Config $config = null;
+    private ?\BtcRelax\Session $session = null;
     
-    /// Static methods
-        
+    /// Static methods      
     public static function bindEvent($event, $callback, $obj = null)
     {
         if (!self::$events[$event]) {
             self::$events[$event] = array();
         }
-   
         self::$events[$event][] = ($obj === null)  ? $callback : array($obj, $callback);
     }
  
@@ -39,7 +36,6 @@ final class Core
         if (!self::$events[$event]) {
             return;
         }
-
         foreach (self::$events[$event] as $callback) {
             if (call_user_func($callback) === false) {
                 break;
@@ -56,7 +52,11 @@ final class Core
         }
         return self::$instance;
     }
-         
+    
+    public static function getRequest(): ?\Symfony\Component\HttpFoundation\Request {
+        return self::getInstance()->request;
+    }
+             
     public static function createApiClient(): \BtcRelax\APIClient
     {
         return new APIClient();
@@ -153,12 +153,11 @@ final class Core
         $this->response = new \Symfony\Component\HttpFoundation\Response();
         if ($this->request->query->has('controller')) {
         } else {
-            //$this->response->headers->set('Cache-Control: no-cache, no-store, must-revalidate');
-            //$this->response->headers->set('Pragma: no-cache');
-            //$this->response->headers->set('Expires: 0');
-            $this->response->setContent($this->getPage());
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+            $this->runPage($this->getPage());
         }
-        $this->response->send();
     }
     
     public function handleException($ex)
@@ -166,8 +165,8 @@ final class Core
         \BtcRelax\Logger::general($ex, \BtcRelax\Logger::ERROR);
         switch ($ex) {
                     case $ex instanceof NotFoundException:
-            \header('HTTP/1.0 404 Not Found');
-            $this->runPage('404', $ex->getMessage());
+                        \header('HTTP/1.0 404 Not Found');
+                        $this->runPage('404', $ex->getMessage());
                         break;
                     case $ex instanceof \BtcRelax\Exception\SessionException:
                         \header('HTTP/1.0 440 Session expired');
@@ -175,82 +174,50 @@ final class Core
                         break;
                     default:
                         \header('HTTP/1.1 500 Internal Server Error');
-            $this->runPage('500', $ex->getMessage());
+                        $this->runPage('500', $ex->getMessage());
                         break;
                 }
     }
 
     public function loadClass($name):bool
     {
-        if (\class_exists($name)) {
-            return true;
-        }
-        \BtcRelax\Logger::general(\sprintf("Loading class: %s", $name), \BtcRelax\Logger::DEBUG);
-        if (array_key_exists($name, self::$CLASSES)) {
-            require_once __DIR__ . self::$CLASSES[$name];
-        } else {
-            if (!$this->tryToAutoload($name)) {
-                require_once __DIR__ . '/vendor/autoload.php';
-            } else {
-                return true;
-            }
-        }
+        if (\class_exists($name)) { return true; }
+        if (array_key_exists($name, self::$CLASSES)) { require_once __DIR__ . self::$CLASSES[$name]; }
         return \class_exists($name);
     }
 
     private function getPage()
     {
-        $page = $this->request->query->has('page')?$this->request->query->get('page') : $this->GetDefaultPage();
+        $page = $this->request->query->has('page')?$this->request->query->get('page') : $this->getDefaultPage();
         return $this->checkPage($page);
     }
 
     private function checkPage(string  $page)
     {
         if (!preg_match('/^[a-z0-9-]+$/i', $page)) {
-            \BtcRelax\Logger::general(\sprintf("Try to request unsafe page:", $page), \BtcRelax\Logger::WARN);
-            throw new \BtcRelax\Exception\NotFoundException('Unsafe page "' . $page . '" requested');
+            throw new \BtcRelax\Exception\NotFoundException(\sprintf("Page %s has worng symbols in name ", $page ));
         }
         if (!$this->hasScript($page) && !$this->hasTemplate($page)) {
-            \BtcRelax\Logger::general(\sprintf("Try to request not existent page:", $page), \BtcRelax\Logger::WARN);
-            throw new \BtcRelax\Exception\NotFoundException('Page "' . $page . '" not found');
+            throw new \BtcRelax\Exception\NotFoundException(\sprintf("Page with name %s not found", $page));
         }
         return $page;
     }
 
-    private function runPage(string $page = null )
+    private function runPage(string $page )
     {
-        if (empty($page)) { $page = $this->GetDefaultPage();  };
-        \BtcRelax\Logger::general(\sprintf('Try to load page:%s called with method:%s', $page, \BtcRelax\Utils::getRequestMethod()), \BtcRelax\Logger::INFO);
-        $run = false;
         if ($this->hasScript($page)) {
-            $run = true;
             $script = $this->getScript($page);
-            \BtcRelax\Logger::general(\sprintf('Loading script:%s', $script), \BtcRelax\Logger::INFO);
-            require $script;
+            include $script;
         }
         if ($this->hasTemplate($page)) {
-            $run = true;
-            //header(\sprintf('page:%s',$page));
-            // data for main template
-            \BtcRelax\Logger::general(\sprintf('Loading template for page:%s', $page), \BtcRelax\Logger::INFO);
             $template = $this->getTemplate($page);
-            //			$flashes = null;
-            //			if (Flash::hasFlashes()) {
-            //				$flashes = Flash::getFlashes();
-            //			}
-            // main template (layout)
-            $header = $this->getHeader();
-            require \filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT') . self::LAYOUT_DIR . 'index.phtml';
-        }
-        if (!$run) {
-            die('Page "' . $page . '" has neither script nor template!');
+            include \filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT') . self::LAYOUT_DIR . 'index.phtml';
         }
     }
 
     private function getScript($page)
     {
-        //return filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT') . self::PAGE_DIR . $page . '.php';
-        return self::PAGE_DIR . $page . '.php';
+       return self::PAGE_DIR . $page . '.php';
     }
 
     private function getTemplate($page)
@@ -268,25 +235,5 @@ final class Core
         return file_exists($this->getTemplate($page));
     }
 
-    private function tryToAutoload($f)
-    {
-        $result = false;
-        $base = dirname(__FILE__) . "/";
-        $interfaceFile = $base . "classes/interface/" . $f . "Interface.php";
-        if (file_exists($interfaceFile)) {
-            require_once $interfaceFile;
-        }
-        $classFile = $base . "classes/" . $f . ".php";
-        if (file_exists($classFile)) {
-            require_once $classFile;
-            $result = true;
-        }
-        $fpath = explode("\\", $f);
-        if ((!$result) && (count($fpath)>1)) {
-            $lf = $fpath[count($fpath)-1];
-            $result = $this->tryToAutoload($lf);
-        }
-        return $result;
-    }
 }
 
