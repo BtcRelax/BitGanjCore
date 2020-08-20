@@ -18,9 +18,10 @@ final class Core
 
     private static $events = array();
     private static ?Core $instance = null;
-    private $request = null;
-    private ?\BtcRelax\Config $config = null;
-    private ?\BtcRelax\Session $session = null;
+    private \Symfony\Component\HttpFoundation\Request $request = null;
+    private \Symfony\Component\HttpFoundation\Response $response = null;
+    private \BtcRelax\Config $config = null;
+    private \BtcRelax\Session $session = null;
     
     /// Static methods
         
@@ -149,20 +150,15 @@ final class Core
     public function run( \Symfony\Component\HttpFoundation\Request $request = null  )
     {
         $this->request = $request ?? \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-        if (\property_exists($this->request->query->parameters , "controller")) {
+        $this->response = new \Symfony\Component\HttpFoundation\Response();
+        if ($this->request->query->has('controller')) {
         } else {
-            header('Cache-Control: no-cache, no-store, must-revalidate');
-            header('Pragma: no-cache');
-            header('Expires: 0');
-            $this->runPage($this->getPage());
+            //$this->response->headers->set('Cache-Control: no-cache, no-store, must-revalidate');
+            //$this->response->headers->set('Pragma: no-cache');
+            //$this->response->headers->set('Expires: 0');
+            $this->response->setContent($this->getPage());
         }
-        //if ($this->getRequest()->isCanAcceptHtml()) {
-            
-        //else {  $cClassName = $this->getRequest()->getApiClassName();
-        //        if (!empty($cClassName) && $this->loadClass($cClassName)) {
-        //            $vController = new $cClassName ;  $vController->processApi(); }
-        //        else { \BtcRelax\API::response('Controller not found',503); }
-        //    }
+        $this->response->send();
     }
     
     public function handleException($ex)
@@ -202,13 +198,9 @@ final class Core
         return \class_exists($name);
     }
 
-    private function getPage($extraParams = null)
+    private function getPage()
     {
-        if (\property_exists($extraParams, 'page')) {
-            $page = $extraParams['page'];
-        } else {
-            $page = $this->GetDefaultPage();
-        }
+        $page = $this->request->query->has('page')?$this->request->query->get('page') : $this->GetDefaultPage();
         return $this->checkPage($page);
     }
 
