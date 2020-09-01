@@ -14,7 +14,7 @@
     ],
     "minimum-stability":"dev",
     "autoload":{
-        "psr-4": {"BtcRelax\\": "src"}
+        "psr-4": {"BtcRelax": "src/"}
     },
     "require": {
         "phpmailer/phpmailer": "v6.1.6",
