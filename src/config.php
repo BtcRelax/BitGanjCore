@@ -27,7 +27,7 @@ final class Config
     }
     
     function __construct() {
-        $cfgfile = \filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT') . '/config/config.ini';
+        $cfgfile = \ini_get("bitganj_cfg") !== false ?  \ini_get("bitganj_cfg") : \filter_input(\INPUT_SERVER, 'DOCUMENT_ROOT')  . '/config/config.ini';
         if (!file_exists($cfgfile)) {
             $errmsg =  \sprintf('Config file:%s does not exists!',$cfgfile);
             \BtcRelax\Logger::general($errmsg, \BtcRelax\Logger::FATAL);

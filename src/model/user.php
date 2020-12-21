@@ -9,7 +9,6 @@ use BtcRelax\Dao\IdentifierDao;
 use BtcRelax\Dao\IdentifierSearchCriteria;
 use BtcRelax\Mapping\CustomerMapper;
 use BtcRelax\Utils;
-use LogicException;
 
 class User extends Customer
 {
