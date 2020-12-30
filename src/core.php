@@ -7,7 +7,7 @@ final class Core
 {
     const PAGE_DIR = '/page/';
     const LAYOUT_DIR = '/layout/';
-    const VER = '1.5.18.2';
+    const VER = '1.0.1';
         
     private static $CLASSES = [
         'BtcRelax\Config' => '/config.php',
